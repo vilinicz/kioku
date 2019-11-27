@@ -1,83 +1,109 @@
-import cv2
-import asyncio
-from starlette import Response, Router, Path
+import sys
 
+from starlette.applications import Starlette
+from starlette.routing import Route
+from starlette.responses import Response, JSONResponse, StreamingResponse
+from starlette.exceptions import HTTPException
+import uvicorn
+import time
+from db import faces_public
+from config import cameras as cc
+from camera import Camera
 
 with open("index.html", "r") as f:
     content = f.read()
 
-
-class Home:
-    def __init__(self, scope):
-        self.scope = scope
-
-    async def __call__(self, receive, send):
-        response = Response(content, media_type="text/html")
-        await response(receive, send)
+cameras = []
 
 
-class Camera:
-    def __init__(self):
-        self.video_source = "sample.mp4"
-
-    async def frames(self):
-        video = cv2.VideoCapture(self.video_source)
-        if not video.isOpened():
-            raise RuntimeError("Could not start video.")
-
-        frame_total = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
-        frame_count = 0
-
-        while True:
-            if frame_count == frame_total:
-                frame_count = 0
-                video = cv2.VideoCapture(self.video_source)
-            ret, frame = video.read()
-            frame_count += 1
-
-            frame_bytes = cv2.imencode(".jpg", frame)[1].tobytes()
-            yield frame_bytes
-            await asyncio.sleep(0.01)
+def home(request):
+    return Response(content, media_type="text/html")
 
 
-class Stream:
-    def __init__(self, scope):
-        self.scope = scope
-        self.camera = Camera()
+async def get_faces(request):
+    results = faces_public()
+    return JSONResponse(results)
 
-    async def __call__(self, receive, send):
-        message = await receive()
 
-        if message["type"] == "http.request":
+async def get_current_face(request):
+    cid = request.path_params['cid']
+    camera = next(filter(lambda c: c.cid == cid, cameras), None)
+    cf = camera.current_face
+    if 'encoding' in cf:
+        del cf['encoding']
+    results = cf
 
-            await send(
-                {
-                    "type": "http.response.start",
-                    "status": 200,
-                    "headers": [
-                        [b"Content-Type", b"multipart/x-mixed-replace; boundary=frame"]
-                    ],
-                }
+    # print(sys.getsizeof(results))
+
+    return JSONResponse(results)
+
+
+async def stop(request):
+    global cameras
+    print('Trying to stop all streams')
+    for c in cameras:
+        c.release()
+
+
+async def stream(request):
+    cid = request.path_params['cid']
+    camera = next(filter(lambda c: c.cid == cid, cameras), None)
+    if not camera:
+        raise HTTPException(404)
+    only_faces = request.query_params and request.query_params['of']
+
+    async def generator(c):
+        print('Running Generator')
+        async for frame in c.frames(only_faces):
+            if await request.is_disconnected():
+                print('Stop Generator')
+                break
+
+            data = b"".join(
+                [
+                    b"--frame\r\n",
+                    b"Content-Type: image/jpeg\r\n\r\n",
+                    frame,
+                    b"\r\n",
+                ]
             )
-            while True:
-                async for frame in self.camera.frames():
-                    data = b"".join(
-                        [
-                            b"--frame\r\n",
-                            b"Content-Type: image/jpeg\r\n\r\n",
-                            frame,
-                            b"\r\n",
-                        ]
-                    )
+            yield data
 
-                    await send(
-                        {"type": "http.response.body", "body": data, "more_body": True}
-                    )
+    return StreamingResponse(generator(camera),
+                             media_type='multipart/x-mixed-replace; '
+                                        'boundary=frame')
 
 
-app = Router(
-    [
-        Path("/", app=Home, methods=["GET"]),
-        Path("/stream/", app=Stream, methods=["GET"]),
-    ]
-)
+def startup():
+    global cameras
+    for c in cc:
+        ccc = Camera(c['id'], c['url'], c['lat'], c['width'], c['height'])
+        ccc.start()
+        cameras.append(
+            ccc
+        )
+    print('Started Cameras:', list(map(lambda cam: cam.cid, cameras)))
+
+
+def shutdown():
+    global cameras
+    print('Trying to stop all streams')
+    for c in cameras:
+        c.release()
+    time.sleep(1.0)
+
+
+routes = [
+    Route("/", endpoint=home, methods=["GET"]),
+    Route("/faces/", endpoint=get_faces, methods=["GET"]),
+    Route("/current_face/{cid:int}", endpoint=get_current_face,
+          methods=["GET"]),
+    Route("/stream/{cid:int}", endpoint=stream, methods=["GET"]),
+    Route("/stop", endpoint=stop, methods=["GET"]),
+]
+
+app = Starlette(debug=True, routes=routes, on_startup=[startup],
+                on_shutdown=[shutdown])
+
+if __name__ == '__main__':
+    uvicorn.run(app, host='0.0.0.0', port=8000)

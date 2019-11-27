@@ -102,3 +102,16 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+.idea/.gitignore
+.idea/dataSources.xml
+.idea/dictionaries/
+.idea/inspectionProfiles/
+.idea/jsonSchemas.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/other.xml
+.idea/vcs.xml
+.idea/vst.iml
+.idea/
+Pipfile.lock
+kioku.db

@@ -1,2 +1,4 @@
+sqlalchemy
+databases
 opencv-python
 starlette
