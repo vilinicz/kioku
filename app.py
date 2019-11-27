@@ -1,7 +1,8 @@
 import sys
 
 from starlette.applications import Starlette
-from starlette.routing import Route
+from starlette.routing import Route, Mount
+from starlette.staticfiles import StaticFiles
 from starlette.responses import Response, JSONResponse, StreamingResponse
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
@@ -11,14 +12,10 @@ from db import faces_public
 from config import cameras as cc
 from camera import Camera
 
-with open("index.html", "r") as f:
+with open("./client/dist/index.html", "r") as f:
     content = f.read()
 
 cameras = []
-
-
-def home(request):
-    return Response(content, media_type="text/html")
 
 
 async def get_faces(request):
@@ -95,12 +92,14 @@ def shutdown():
 
 
 routes = [
-    Route("/", endpoint=home, methods=["GET"]),
+    Mount('/app', app=StaticFiles(directory='client/dist', html=True),
+          name="client"),
     Route("/faces/", endpoint=get_faces, methods=["GET"]),
     Route("/current_face/{cid:int}", endpoint=get_current_face,
           methods=["GET"]),
     Route("/stream/{cid:int}", endpoint=stream, methods=["GET"]),
     Route("/stop", endpoint=stop, methods=["GET"]),
+
 ]
 
 app = Starlette(debug=True, routes=routes, on_startup=[startup],

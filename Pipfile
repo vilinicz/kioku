@@ -13,6 +13,7 @@ imutils = "*"
 face-recognition = "*"
 numpy = "==1.16.1"
 funcy = "*"
+aiofiles = "*"
 
 [requires]
 python_version = "3.7"
