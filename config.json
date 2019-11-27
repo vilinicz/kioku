@@ -2,7 +2,7 @@
   "cameras": [
     {
       "id": 1,
-      "url": 0,
+      "url": "rtsp://192.168.1.10:554/user=admin&password=&channel=1&stream=1",
       "lat": 0,
       "width": 1280,
       "height": 720

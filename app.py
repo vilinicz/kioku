@@ -4,6 +4,7 @@ from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.responses import Response, JSONResponse, StreamingResponse
 from starlette.exceptions import HTTPException
+from starlette.middleware.cors import CORSMiddleware
 import uvicorn
 import time
 from db import faces_public
@@ -104,6 +105,10 @@ routes = [
 
 app = Starlette(debug=True, routes=routes, on_startup=[startup],
                 on_shutdown=[shutdown])
+
+app.add_middleware(CORSMiddleware,
+                   allow_origins=['http://localhost:8080'],
+                   )
 
 if __name__ == '__main__':
     uvicorn.run(app, host='0.0.0.0', port=8000)

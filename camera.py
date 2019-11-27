@@ -52,7 +52,7 @@ def detect(frame):
                 match = face_recognition.compare_faces(face_encodings, fe,
                                                        tolerance=0.55)
 
-                if ((datetime.now() - buffer_time).seconds > 0.6) or (
+                if ((datetime.now() - buffer_time).seconds > 0.8) or (
                         len(face_encodings) > buffer):
                     face_encodings = []
                     face_locations = []
@@ -160,7 +160,7 @@ class Camera:
                 continue
 
             count += 1
-            if count < 5:
+            if count < 4:
                 continue
             count = 0
 
