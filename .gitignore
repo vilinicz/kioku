@@ -115,6 +115,7 @@ venv.bak/
 .idea/
 Pipfile.lock
 kioku.db
+config.json
 
 # CLIENT
 client/.DS_Store
