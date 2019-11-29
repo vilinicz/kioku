@@ -1,10 +1,11 @@
+import asyncio
+import logging
 import platform
 from base64 import b64encode
-from datetime import timedelta, datetime
-from timeit import default_timer as timer
-import logging
-import cv2
+from datetime import datetime
 from threading import Thread
+
+import cv2
 import face_recognition
 import numpy as np
 
@@ -15,13 +16,13 @@ logger.setLevel(logging.DEBUG)
 
 face_locations = []
 face_encodings = []
-buffer = 4
+buffer_size = 4
 buffer_time = datetime.now()
 
 
 def detect(frame):
     global face_locations, face_encodings, \
-        buffer, buffer_time
+        buffer_size, buffer_time
 
     current_face = {}
 
@@ -53,7 +54,7 @@ def detect(frame):
                                                        tolerance=0.55)
 
                 if ((datetime.now() - buffer_time).seconds > 0.8) or (
-                        len(face_encodings) > buffer):
+                        len(face_encodings) > buffer_size):
                     face_encodings = []
                     face_locations = []
                     logger.debug('Clear encoding array due timeout')
@@ -65,14 +66,14 @@ def detect(frame):
                     logger.debug('Skip encoding')
                     pass
 
-    if len(face_encodings) >= buffer:
+    if len(face_encodings) >= buffer_size:
         logger.debug('Running DB Search')
         if len(faces()) > 0:
             for face in faces():
                 match = face_recognition.compare_faces(face_encodings,
                                                        face['encoding'],
                                                        tolerance=0.6)
-                if sum(match) > buffer / 2:
+                if sum(match) > buffer_size / 2:
                     current_face = face
                     logger.debug('Match with: %s, %s', face['name'], face['id'])
                     matched = True
@@ -126,18 +127,32 @@ def open_stream(url, lat, width, height):
 class Camera:
     def __init__(self, cid, url, lat, width, height):
         self.cid = cid
+        self.url = url
+        self.lat = lat
+        self.width = width
+        self.height = height
+
         self.stream = open_stream(url, lat, width, height)
         self.frame = None
         self.frame_face = None
         self.current_face = {}
         self.current_face_time = datetime.now()
 
+        self.jpeg_quality = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
+        self.placeholder = []
+
         self.stopped = False
 
         self.thread = Thread(target=self.run, args=())
         self.thread.daemon = True
 
+        with open("placeholder.jpg", "rb") as image:
+            print("Load placeholder")
+            f = image.read()
+            self.placeholder = f
+
         if not self.stream.isOpened():
+            # TODO maybe retry instead of raise error
             raise RuntimeError("Could not start video.")
         else:
             print(self.stream.isOpened())
@@ -151,10 +166,10 @@ class Camera:
         while not self.stopped:
             (g, f) = self.stream.read()
 
-            # if g:
-            #     assert not isinstance(f, type(None)), 'frame not found'
-            # else:
-            #     continue
+            if not g:
+                self.stream = open_stream(self.url, self.lat,
+                                          self.width, self.height)
+                continue
 
             if np.shape(f) == () or np.sum(f) == 0:
                 continue
@@ -174,6 +189,7 @@ class Camera:
                     self.current_face_time = datetime.now()
                 elif (datetime.now() - self.current_face_time).seconds > 5:
                     self.current_face = {}
+                    self.frame_face = None
             except Exception as e:
                 print(e)
                 continue
@@ -181,13 +197,18 @@ class Camera:
     async def frames(self, only_faces: bool = False):
         while not self.stopped:
             if only_faces:
-                ok, encoded = cv2.imencode(".jpg", self.frame_face.copy())
-                if not ok:
-                    continue
-                yield encoded.tobytes()
+                if self.frame_face is not None:
+                    ok, encoded = cv2.imencode(".jpg", self.frame_face,
+                                               self.jpeg_quality)
+                    if not ok:
+                        continue
+                    yield encoded.tobytes()
+                else:
+                    yield self.placeholder
+                    await asyncio.sleep(0.5)
             else:
                 f = cv2.resize(self.frame.copy(), (0, 0), fx=0.5, fy=0.5)
-                ok, encoded = cv2.imencode(".jpg", f)
+                ok, encoded = cv2.imencode(".jpg", f, self.jpeg_quality)
                 if not ok:
                     continue
                 yield encoded.tobytes()

@@ -1,19 +1,16 @@
-import sys
+import time
 
+import uvicorn
 from starlette.applications import Starlette
-from starlette.routing import Route, Mount
-from starlette.staticfiles import StaticFiles
-from starlette.responses import Response, JSONResponse, StreamingResponse
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
-import uvicorn
-import time
-from db import faces_public
-from config import cameras as cc
-from camera import Camera
+from starlette.responses import JSONResponse, StreamingResponse
+from starlette.routing import Route, Mount
+from starlette.staticfiles import StaticFiles
 
-with open("./client/dist/index.html", "r") as f:
-    content = f.read()
+from camera import Camera
+from config import cameras as cc
+from db import faces_public
 
 cameras = []
 
@@ -92,14 +89,13 @@ def shutdown():
 
 
 routes = [
-    Mount('/app', app=StaticFiles(directory='client/dist', html=True),
-          name="client"),
     Route("/faces/", endpoint=get_faces, methods=["GET"]),
     Route("/current_face/{cid:int}", endpoint=get_current_face,
           methods=["GET"]),
     Route("/stream/{cid:int}", endpoint=stream, methods=["GET"]),
     Route("/stop", endpoint=stop, methods=["GET"]),
-
+    Mount('/app', app=StaticFiles(directory='client/dist', html=True),
+          name="client"),
 ]
 
 app = Starlette(debug=True, routes=routes, on_startup=[startup],
