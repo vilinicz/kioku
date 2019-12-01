@@ -1,8 +1,8 @@
-import sqlite3
-import numpy as np
 import io
 import os
+import sqlite3
 
+import numpy as np
 
 # create a default path to connect to and create (if necessary) a database
 DEFAULT_PATH = os.path.join(os.path.dirname(__file__), 'kioku.db')
@@ -34,7 +34,8 @@ def insert(name, encoding):
     conn = connect()
     cursor = conn.cursor()
 
-    cursor.execute('INSERT INTO faces (name, encoding) values (?, ?)', (name, encoding))
+    cursor.execute('INSERT INTO faces (name, encoding) values (?, ?)',
+                   (name, encoding))
 
     conn.commit()
     conn.close()
@@ -42,12 +43,13 @@ def insert(name, encoding):
 
 def faces():
     conn = connect()
-    conn.row_factory = lambda c, r: dict(zip([col[0] for col in c.description], r))
+    conn.row_factory = lambda c, r: dict(
+        zip([col[0] for col in c.description], r))
     cursor = conn.cursor()
 
     cursor.execute('SELECT * from faces')
     data = cursor.fetchall()
-
+    print('Read DB faces()')
     conn.commit()
     conn.close()
 
@@ -56,13 +58,41 @@ def faces():
 
 def faces_public():
     conn = connect()
-    conn.row_factory = lambda c, r: dict(zip([col[0] for col in c.description], r))
+    conn.row_factory = lambda c, r: dict(
+        zip([col[0] for col in c.description], r))
     cursor = conn.cursor()
 
     cursor.execute('SELECT id, name from faces')
     data = cursor.fetchall()
-
+    print('Read DB faces_public()')
     conn.commit()
     conn.close()
 
     return data
+
+
+class Face:
+    cache = list()
+
+    @classmethod
+    def all(cls):
+        if not cls.cache:
+            cls.load()
+        return cls.cache
+
+    @classmethod
+    def all_public(cls):
+        return faces_public()
+
+    @classmethod
+    def find(cls, id: int):
+        return next((f for f in cls.all_public() if f["id"] == id), False)
+
+    @classmethod
+    def create(cls, name: str, encoding):
+        insert(name, encoding)
+        cls.load()
+
+    @classmethod
+    def load(cls):
+        cls.cache = faces()

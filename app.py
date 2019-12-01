@@ -10,13 +10,19 @@ from starlette.staticfiles import StaticFiles
 
 from camera import Camera
 from config import cameras as cc
-from db import faces_public
+from db import Face
 
 cameras = []
 
 
 async def get_faces(request):
-    results = faces_public()
+    results = Face.all_public()
+    return JSONResponse(results)
+
+
+async def get_face(request):
+    fid = request.path_params['fid']
+    results = Face.find(fid)
     return JSONResponse(results)
 
 
@@ -87,6 +93,7 @@ def shutdown():
 
 
 routes = [
+    Route("/faces/{fid:int}", endpoint=get_face, methods=["GET"]),
     Route("/faces/", endpoint=get_faces, methods=["GET"]),
     Route("/current_face/{cid:int}", endpoint=get_current_face,
           methods=["GET"]),

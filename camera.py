@@ -10,7 +10,7 @@ import cv2
 import face_recognition
 import numpy as np
 
-from db import faces, insert
+from db import Face, faces, insert
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -38,7 +38,7 @@ def detect(frame):
         rgb_small_frame = small_frame[:, :, ::-1]
     except Exception as e:
         process_this_frame = False
-        print(str(e))
+        print(e)
 
     if process_this_frame:
         # Add to params model='cnn' to detect on GPU
@@ -66,14 +66,17 @@ def detect(frame):
                                                        tolerance=0.3)
                 if sum(match) > buffer_size / 1.5:
                     # logger.debug('Running DB Search.')
-                    if len(faces()) > 0:
-                        for face in faces():
+                    if not Face.all():
+                        print('DB is empty. Insert first face')
+                        Face.create('', average)
+                    else:
+                        for face in Face.all():
                             match = face_recognition.compare_faces(
                                 [average],
                                 face['encoding'],
                                 tolerance=0.6)
                             if all(match):
-                                current_face = face
+                                current_face = face.copy()
                                 logger.debug('Match with: %s, %s',
                                              face['name'], face['id'])
                                 matched = True
@@ -81,10 +84,7 @@ def detect(frame):
 
                         if not matched:
                             print('No Match. Insert new face')
-                            insert('', average)
-                    else:
-                        print('DB is empty. Insert first face')
-                        insert('', average)
+                            Face.create('', average)
 
                     top, right, bottom, left = face_locations[buffer_size - 1]
                     top = int(top * 4 * 0.6)
@@ -179,7 +179,7 @@ class Camera:
                 continue
             count = 0
 
-            self.frame = f
+            self.frame = f.copy()
 
             try:
                 ok, ff, cf = detect(f)
@@ -191,7 +191,7 @@ class Camera:
                     self.current_face = {}
                     self.frame_face = None
             except Exception as e:
-                print(e)
+                print('Frame detect() error', e)
                 continue
 
     async def frames(self, only_faces: bool = False):
