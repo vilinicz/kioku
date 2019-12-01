@@ -28,8 +28,6 @@ async def get_current_face(request):
         del cf['encoding']
     results = cf
 
-    # print(sys.getsizeof(results))
-
     return JSONResponse(results)
 
 
