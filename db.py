@@ -41,6 +41,17 @@ def insert(name, encoding):
     conn.close()
 
 
+def update_face(fid, name):
+    conn = connect()
+    cursor = conn.cursor()
+
+    query = """UPDATE faces set name = ? where id = ?"""
+    values = (fid, name)
+    cursor.execute(query, values)
+    conn.commit()
+    conn.close()
+
+
 def faces():
     conn = connect()
     conn.row_factory = lambda c, r: dict(
@@ -49,7 +60,6 @@ def faces():
 
     cursor.execute('SELECT * from faces')
     data = cursor.fetchall()
-    print('Read DB faces()')
     conn.commit()
     conn.close()
 
@@ -64,7 +74,6 @@ def faces_public():
 
     cursor.execute('SELECT id, name from faces')
     data = cursor.fetchall()
-    print('Read DB faces_public()')
     conn.commit()
     conn.close()
 
@@ -85,13 +94,17 @@ class Face:
         return faces_public()
 
     @classmethod
-    def find(cls, id: int):
-        return next((f for f in cls.all_public() if f["id"] == id), False)
+    def find(cls, fid: int):
+        return next((f for f in cls.all_public() if f["id"] == fid), False)
 
     @classmethod
     def create(cls, name: str, encoding):
         insert(name, encoding)
         cls.load()
+
+    @classmethod
+    def update(cls, fid: int, name: str):
+        update_face(fid, name)
 
     @classmethod
     def load(cls):
