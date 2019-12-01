@@ -15,7 +15,8 @@ from db import faces, insert
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-buffer_size = 6
+# TODO buffer size should be in config.json
+buffer_size = 10
 buffer_time = datetime.now()
 face_locations = deque(maxlen=buffer_size)
 face_encodings = deque(maxlen=buffer_size)
@@ -58,12 +59,12 @@ def detect(frame):
             buffer_time = datetime.now()
 
             if len(face_encodings) == buffer_size:
-                average = np.average(np.array(face_encodings), axis=0)
+                average = np.mean(np.array(face_encodings), axis=0)
 
                 match = face_recognition.compare_faces(face_encodings,
                                                        average,
                                                        tolerance=0.3)
-                if all(match):
+                if sum(match) > buffer_size / 1.5:
                     # logger.debug('Running DB Search.')
                     if len(faces()) > 0:
                         for face in faces():
@@ -79,16 +80,17 @@ def detect(frame):
                                 break
 
                         if not matched:
-                            print('Not Matched')
-                            insert('', face_encodings[buffer_size - 1])
+                            print('No Match. Insert new face')
+                            insert('', average)
                     else:
-                        insert('', face_encodings[buffer_size - 1])
+                        print('DB is empty. Insert first face')
+                        insert('', average)
 
                     top, right, bottom, left = face_locations[buffer_size - 1]
-                    top = top * 4 - 100
-                    right = right * 4 + 100
-                    bottom = bottom * 4 + 100
-                    left = left * 4 - 50
+                    top = int(top * 4 * 0.6)
+                    right = int(right * 4 * 1.08)
+                    bottom = int(bottom * 4 * 1.05)
+                    left = int(left * 4 * 0.92)
 
                     frame_face = frame[top:bottom, left:right]
 
@@ -177,7 +179,7 @@ class Camera:
                 continue
             count = 0
 
-            self.frame = f.copy()
+            self.frame = f
 
             try:
                 ok, ff, cf = detect(f)
@@ -210,7 +212,6 @@ class Camera:
                 if not ok:
                     continue
                 yield encoded.tobytes()
-            # await asyncio.sleep(0.01)
 
     def stop(self):
         self.stopped = True
