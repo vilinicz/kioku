@@ -2,7 +2,7 @@
   <div id="app">
     <template v-if="face.hasOwnProperty('id')">
       <h1>{{face.name}}</h1>
-      <img v-bind:src="'data:image/jpeg;base64,'+ face.image"/>
+      <img v-bind:src="'data:image/jpeg;base64,'+ face.image" alt="image"/>
     </template>
   </div>
 </template>

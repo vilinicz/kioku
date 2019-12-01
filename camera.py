@@ -2,6 +2,7 @@ import asyncio
 import logging
 import platform
 from base64 import b64encode
+from collections import deque
 from datetime import datetime
 from threading import Thread
 
@@ -14,14 +15,15 @@ from db import faces, insert
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-face_locations = []
-face_encodings = []
-buffer_size = 4
+buffer_size = 6
 buffer_time = datetime.now()
+face_locations = deque(maxlen=buffer_size)
+face_encodings = deque(maxlen=buffer_size)
+average = None
 
 
 def detect(frame):
-    global face_locations, face_encodings, \
+    global average, face_locations, face_encodings, \
         buffer_size, buffer_time
 
     current_face = {}
@@ -44,63 +46,59 @@ def detect(frame):
         if any(fl):
             fe = face_recognition.face_encodings(rgb_small_frame,
                                                  [fl[0]])[0]
-            if len(face_encodings) == 0:
-                buffer_time = datetime.now()
-                face_encodings.append(fe)
-                face_locations.append(fl[0])
-                logger.debug('Start collection')
-            else:
-                match = face_recognition.compare_faces(face_encodings, fe,
-                                                       tolerance=0.55)
 
-                if ((datetime.now() - buffer_time).seconds > 0.8) or (
-                        len(face_encodings) > buffer_size):
-                    face_encodings = []
-                    face_locations = []
-                    logger.debug('Clear encoding array due timeout')
-                elif all(match):
-                    face_encodings.append(fe)
-                    face_locations.append(fl[0])
-                    logger.debug('Collect encoding №: %s', len(face_encodings))
-                else:
-                    logger.debug('Skip encoding')
-                    pass
+            # Clear buffer if last frame is older then 1 second
+            if (datetime.now() - buffer_time).seconds > 1:
+                logger.debug('Clearing Buffer due timeout')
+                face_encodings.clear()
+                face_locations.clear()
 
-    if len(face_encodings) >= buffer_size:
-        logger.debug('Running DB Search')
-        if len(faces()) > 0:
-            for face in faces():
+            face_encodings.append(fe)
+            face_locations.append(fl[0])
+            buffer_time = datetime.now()
+
+            if len(face_encodings) == buffer_size:
+                average = np.average(np.array(face_encodings), axis=0)
+
                 match = face_recognition.compare_faces(face_encodings,
-                                                       face['encoding'],
-                                                       tolerance=0.6)
-                if sum(match) > buffer_size / 2:
-                    current_face = face
-                    logger.debug('Match with: %s, %s', face['name'], face['id'])
-                    matched = True
-                    break
+                                                       average,
+                                                       tolerance=0.3)
+                if all(match):
+                    # logger.debug('Running DB Search.')
+                    if len(faces()) > 0:
+                        for face in faces():
+                            match = face_recognition.compare_faces(
+                                [average],
+                                face['encoding'],
+                                tolerance=0.6)
+                            if all(match):
+                                current_face = face
+                                logger.debug('Match with: %s, %s',
+                                             face['name'], face['id'])
+                                matched = True
+                                break
 
-            if not matched:
-                insert('', face_encodings[3])
-        else:
-            insert('', face_encodings[3])
+                        if not matched:
+                            print('Not Matched')
+                            insert('', face_encodings[buffer_size - 1])
+                    else:
+                        insert('', face_encodings[buffer_size - 1])
 
-        top, right, bottom, left = face_locations[3]
-        top = top * 4 - 100
-        right = right * 4 + 100
-        bottom = bottom * 4 + 100
-        left = left * 4 - 50
+                    top, right, bottom, left = face_locations[buffer_size - 1]
+                    top = top * 4 - 100
+                    right = right * 4 + 100
+                    bottom = bottom * 4 + 100
+                    left = left * 4 - 50
 
-        frame_face = frame[top:bottom, left:right]
+                    frame_face = frame[top:bottom, left:right]
 
-        ok, encoded = cv2.imencode(".jpg", frame_face)
-        fbytes = b64encode(encoded)
-        fstring = fbytes.decode('utf-8')
-        current_face['image'] = fstring
+                    ok, encoded = cv2.imencode(".jpg", frame_face)
+                    fbytes = b64encode(encoded)
+                    fstring = fbytes.decode('utf-8')
+                    current_face['image'] = fstring
 
-        logging.debug('Return current face and clear buffer')
-        face_encodings = []
-        face_locations = []
-        return True, frame_face, current_face
+                    return True, frame_face, current_face
+
     return False, None, current_face
 
 
