@@ -1,9 +1,10 @@
 <template>
   <div id="app">
-    <template v-if="face.hasOwnProperty('id')">
+    <div v-for="face in faces" :key="face.id">
       <h1>{{face.name}}</h1>
-      <img v-bind:src="'data:image/jpeg;base64,'+ face.image" alt="image"/>
-    </template>
+      <h3>{{face.datetime}}</h3>
+      <img class="image" v-bind:src="'data:image/jpeg;base64,'+ face.image" alt="image"/>
+    </div>
   </div>
 </template>
 
@@ -11,7 +12,6 @@
 export default {
   data() {
     return {
-      face: {},
       polling: null,
     };
   },
@@ -19,11 +19,14 @@ export default {
   methods: {
     pollData() {
       this.polling = setInterval(() => {
-        this.$http.get('/current_face/1')
-          .then((res) => {
-            this.face = res.data.id === this.face.id ? this.face : res.data;
-          });
+        this.$store.dispatch('get_current_face');
       }, 1000);
+    },
+  },
+
+  computed: {
+    faces() {
+      return this.$store.state.faces;
     },
   },
 
@@ -40,5 +43,10 @@ export default {
 <style lang="scss">
   #app {
     color: #2c3e50;
+  }
+
+  .image {
+    width: 100px;
+    height: 100px;
   }
 </style>

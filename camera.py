@@ -10,7 +10,7 @@ import cv2
 import face_recognition
 import numpy as np
 
-from db import Face, faces, insert
+from db import Face
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -65,7 +65,6 @@ def detect(frame):
                                                        average,
                                                        tolerance=0.3)
                 if sum(match) > buffer_size / 1.5:
-                    # logger.debug('Running DB Search.')
                     if not Face.all():
                         print('DB is empty. Insert first face')
                         Face.create('', average)
@@ -187,7 +186,7 @@ class Camera:
                     self.frame_face = ff
                     self.current_face = cf
                     self.current_face_time = datetime.now()
-                elif (datetime.now() - self.current_face_time).seconds > 5:
+                elif (datetime.now() - self.current_face_time).seconds > 2:
                     self.current_face = {}
                     self.frame_face = None
             except Exception as e:

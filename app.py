@@ -1,4 +1,5 @@
 import time
+import datetime
 
 import uvicorn
 from starlette.applications import Starlette
@@ -16,14 +17,23 @@ cameras = []
 
 
 async def get_faces(request):
-    results = Face.all_public()
-    return JSONResponse(results)
+    res = Face.all_public()
+    return JSONResponse(res)
 
 
 async def get_face(request):
     fid = request.path_params['fid']
-    results = Face.find(fid)
-    return JSONResponse(results)
+    res = Face.find(fid)
+    return JSONResponse(res)
+
+
+async def update_face(request):
+    fid = request.path_params['fid']
+    payload = await request.json()
+    name = payload['name']
+
+    res = await Face.update(fid, name)
+    return JSONResponse(res.json())
 
 
 async def get_current_face(request):
@@ -32,9 +42,9 @@ async def get_current_face(request):
     cf = camera.current_face
     if 'encoding' in cf:
         del cf['encoding']
-    results = cf
+    res = cf
 
-    return JSONResponse(results)
+    return JSONResponse(res)
 
 
 async def stop(request):
@@ -94,6 +104,7 @@ def shutdown():
 
 routes = [
     Route("/faces/{fid:int}", endpoint=get_face, methods=["GET"]),
+    Route('/faces/{fid:int}', endpoint=update_face, methods=['PATCH']),
     Route("/faces/", endpoint=get_faces, methods=["GET"]),
     Route("/current_face/{cid:int}", endpoint=get_current_face,
           methods=["GET"]),

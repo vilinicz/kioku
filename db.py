@@ -105,6 +105,7 @@ class Face:
     @classmethod
     def update(cls, fid: int, name: str):
         update_face(fid, name)
+        return cls.find(fid)
 
     @classmethod
     def load(cls):
