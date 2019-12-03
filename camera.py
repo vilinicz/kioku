@@ -76,8 +76,8 @@ def detect(frame):
                                 tolerance=0.6)
                             if all(match):
                                 current_face = face.copy()
-                                logger.debug('Match with: %s, %s',
-                                             face['name'], face['id'])
+                                # logger.debug('Match with: %s, %s',
+                                #              face['name'], face['id'])
                                 matched = True
                                 break
 
@@ -165,10 +165,10 @@ class Camera:
         while not self.stopped:
             (g, f) = self.stream.read()
 
-            if not g:
-                self.stream = open_stream(self.url, self.lat,
-                                          self.width, self.height)
-                continue
+            # if not g:
+            #     self.stream = open_stream(self.url, self.lat,
+            #                               self.width, self.height)
+            #     continue
 
             if np.shape(f) == () or np.sum(f) == 0:
                 continue

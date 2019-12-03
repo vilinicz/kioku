@@ -110,7 +110,7 @@ routes = [
           methods=["GET"]),
     Route("/stream/{cid:int}", endpoint=stream, methods=["GET"]),
     Route("/stop", endpoint=stop, methods=["GET"]),
-    Mount('/app', app=StaticFiles(directory='client/dist', html=True),
+    Mount('/', app=StaticFiles(directory='client/dist', html=True),
           name="client"),
 ]
 
@@ -118,7 +118,10 @@ app = Starlette(debug=True, routes=routes, on_startup=[startup],
                 on_shutdown=[shutdown])
 
 app.add_middleware(CORSMiddleware,
-                   allow_origins=['http://localhost:8080'],
+                   allow_origins=['*', 'http://localhost:8080',
+                                  'http://192.168.1.254:8080',
+                                  '*'
+                                  ],
                    )
 
 if __name__ == '__main__':

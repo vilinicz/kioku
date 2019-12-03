@@ -12,7 +12,6 @@ uvicorn = "*"
 imutils = "*"
 face-recognition = "*"
 numpy = "==1.16.1"
-funcy = "*"
 aiofiles = "*"
 
 [requires]
