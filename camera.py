@@ -16,7 +16,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
 # TODO buffer size should be in config.json
-buffer_size = 10
+buffer_size = 7
 buffer_time = datetime.now()
 face_locations = deque(maxlen=buffer_size)
 face_encodings = deque(maxlen=buffer_size)
@@ -45,6 +45,7 @@ def detect(frame):
         fl = face_recognition.face_locations(rgb_small_frame)
 
         if any(fl):
+            # TODO Recognise all faces instead one
             fe = face_recognition.face_encodings(rgb_small_frame,
                                                  [fl[0]])[0]
 

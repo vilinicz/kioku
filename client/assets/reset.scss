@@ -8,7 +8,8 @@
 
 /**
  * 1. Correct the line height in all browsers.
- * 2. Prevent adjustments of font size after orientation changes in IE on Windows Phone and in iOS.
+ * 2. Prevent adjustments of font size after orientation changes
+      in IE on Windows Phone and in iOS.
  * 3. Change the default tap highlight to be completely transparent in iOS.
  * 4. Setting @viewport causes scrollbars to overlap content in IE11 and Edge.
  */
@@ -24,11 +25,11 @@ html {
 }
 
 body {
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, "Helvetica Neue", sans-serif;
+  font-family: -apple-system, system-ui, BlinkMacSystemFont,
+  "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, "Helvetica Neue", sans-serif;
   font-size: 1rem;
   font-weight: 400;
   font-style: normal;
-  color: #373a3c;
   // background-color: #fff;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: subpixel-antialiased;
@@ -169,7 +170,8 @@ th {
 
 /**
  * 1. Remove the default vertical scrollbar in IE 10+.
- * 2. Textareas should really only resize vertically so they don't break their (horizontal) containers.
+ * 2. Textareas should really only resize vertically so they don't break their
+      (horizontal) containers.
  */
 textarea {
   overflow: auto; /* 1 */
@@ -177,7 +179,8 @@ textarea {
 }
 
 /**
- * 1. Prevent a WebKit bug where (2) destroys native `audio` and `video` controls in Android 4.
+ * 1. Prevent a WebKit bug where (2) destroys native
+      `audio` and `video` controls in Android 4.
  * 2. Correct the inability to style clickable types in iOS and Safari.
  */
 button,

@@ -45,8 +45,8 @@ def update_face(fid, name):
     conn = connect()
     cursor = conn.cursor()
 
-    query = """UPDATE faces set name = ? where id = ?"""
-    values = (fid, name)
+    query = 'UPDATE faces set name = ? where id = ?'
+    values = (name, fid)
     cursor.execute(query, values)
     conn.commit()
     conn.close()
@@ -105,6 +105,7 @@ class Face:
     @classmethod
     def update(cls, fid: int, name: str):
         update_face(fid, name)
+        cls.load()
         return cls.find(fid)
 
     @classmethod

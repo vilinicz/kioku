@@ -32,8 +32,8 @@ async def update_face(request):
     payload = await request.json()
     name = payload['name']
 
-    res = await Face.update(fid, name)
-    return JSONResponse(res.json())
+    res = Face.update(fid, name)
+    return JSONResponse(res)
 
 
 async def get_current_face(request):
@@ -117,12 +117,11 @@ routes = [
 app = Starlette(debug=True, routes=routes, on_startup=[startup],
                 on_shutdown=[shutdown])
 
+# TODO it's dangerous to allow all origins. Restrict origins for prod.
 app.add_middleware(CORSMiddleware,
-                   allow_origins=['*', 'http://localhost:8080',
-                                  'http://192.168.1.254:8080',
-                                  '*'
-                                  ],
-                   )
+                   allow_origins=['*'],
+                   allow_methods=['*'],
+                   allow_headers=['*'])
 
 if __name__ == '__main__':
     uvicorn.run(app, host='0.0.0.0', port=8000)
