@@ -47,7 +47,7 @@ def detect(frame):
         if any(fl):
             # TODO Recognise all faces instead one
             fe = face_recognition.face_encodings(rgb_small_frame,
-                                                 [fl[0]])[0]
+                                                 [fl[0]], num_jitters=3)[0]
 
             # Clear buffer if last frame is older then 1 second
             if (datetime.now() - buffer_time).seconds > 1:
@@ -64,7 +64,7 @@ def detect(frame):
 
                 match = face_recognition.compare_faces(face_encodings,
                                                        average,
-                                                       tolerance=0.3)
+                                                       tolerance=0.29)
                 if sum(match) > buffer_size / 1.5:
                     if not Face.all():
                         print('DB is empty. Insert first face')
