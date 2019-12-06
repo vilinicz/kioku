@@ -47,7 +47,7 @@ def detect(frame):
         if any(fl):
             # TODO Recognise all faces instead one
             fe = face_recognition.face_encodings(rgb_small_frame,
-                                                 [fl[0]], num_jitters=3)[0]
+                                                 [fl[0]])[0]
 
             # Clear buffer if last frame is older then 1 second
             if (datetime.now() - buffer_time).seconds > 1:

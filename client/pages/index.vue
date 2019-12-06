@@ -10,6 +10,7 @@
       <FaceCard
         v-for="face in faces"
         :key="face.id"
+        @destroy="removeOldFace"
         v-bind="face"
       />
     </transition-group>
@@ -27,6 +28,7 @@ export default {
   data () {
     return {
       polling: null,
+      sorting: null,
       faces: [],
       error: undefined
     }
@@ -34,13 +36,25 @@ export default {
 
   beforeDestroy () {
     clearInterval(this.polling)
+    clearInterval(this.sorting)
   },
 
   created () {
     this.pollData()
+    this.sortFaces()
   },
 
   methods: {
+    removeOldFace (id) {
+      this.faces = this.faces.filter(f => f.id !== id)
+    },
+
+    sortFaces () {
+      this.polling = setInterval(() => {
+        this.faces = this.faces.sort((a, b) => b.datetime - a.datetime)
+      }, 2000)
+    },
+
     pollData () {
       this.polling = setInterval(() => {
         this.get()
@@ -63,17 +77,17 @@ export default {
         const oldFace = this.faces.find(f => f.id === newFace.id)
 
         if (oldFace) {
+          if (((Date.now() - oldFace.datetime) / 1000) > 3) {
+            oldFace.image = newFace.image
+          }
           oldFace.datetime = Date.now()
         } else {
-          if (this.faces.length === 6) {
+          if (this.faces.length === 8) {
             this.faces.pop()
           }
           this.faces.unshift(newFace)
         }
       }
-
-      // Clear too old faces
-      this.faces = this.faces.filter(f => ((Date.now() - f.datetime) / 1000) < 5)
     }
   }
 }
@@ -81,19 +95,20 @@ export default {
 </script>
 <style lang="scss">
 #app {
-  color: #2c3e50;
+  color: $gray-darkest;
   line-height: 1.6;
-  padding: 2vw 4vw;
+  // padding: 2vw 0;
   min-height: 100vh;
-  background: linear-gradient(to bottom, #fff, #dcdcdc);
+  font-family: "Avenir Next",sans-serif;
+  // background: linear-gradient(to bottom, $gray-silver, $gray-lightest);
 
   input {
-    color: #2c3e50;
+    color: $gray-darkest;
   }
 }
 
 .error {
-  background-color: rgba(orangered, 0.6);
+  background-color: rgba($danger, 0.8);
   color: #fff;
   font-weight: bold;
   position: absolute;
@@ -101,19 +116,21 @@ export default {
   left: 0;
   width: 100%;
   text-align: center;
-  padding: 0.5rem;
+  padding: 0.75rem;
+  z-index: 99;
 }
 
-.cards-enter
-  /* .card-leave-active for <2.1.8 */
-{
+.cards-enter {
   opacity: 0;
   transform: translateY(-30vh);
+  background-color: $yellow-highlight;
+  // transition: background-color 1s ease, translate 0.5s ease-in-out, opacity 0.5s ease;
 }
 
 .cards-enter-to {
   opacity: 1;
   transform: none;
+  background-color: #fff;
 }
 
 .cards-leave-to {

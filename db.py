@@ -41,12 +41,12 @@ def insert(name, encoding):
     conn.close()
 
 
-def update_face(fid, name):
+def update_face(fid, name, room, note):
     conn = connect()
     cursor = conn.cursor()
 
-    query = 'UPDATE faces set name = ? where id = ?'
-    values = (name, fid)
+    query = 'UPDATE faces set name = ?, room = ?, note = ? where id = ?'
+    values = (name, room, note, fid)
     cursor.execute(query, values)
     conn.commit()
     conn.close()
@@ -103,8 +103,8 @@ class Face:
         cls.load()
 
     @classmethod
-    def update(cls, fid: int, name: str):
-        update_face(fid, name)
+    def update(cls, fid: int, name: str, room: int, note: str):
+        update_face(fid, name, room, note)
         cls.load()
         return cls.find(fid)
 

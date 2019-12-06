@@ -31,8 +31,10 @@ async def update_face(request):
     fid = request.path_params['fid']
     payload = await request.json()
     name = payload['name']
+    room = payload['room']
+    note = payload['note']
 
-    res = Face.update(fid, name)
+    res = Face.update(fid, name, room, note)
     return JSONResponse(res)
 
 
