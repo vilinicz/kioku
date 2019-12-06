@@ -116,7 +116,7 @@ venv.bak/
 Pipfile.lock
 kioku.db
 config.json
-.DS_store
+.DS_Store
 
 # CLIENT
 client/.DS_Store
@@ -135,4 +135,5 @@ client/*.sln
 client/*.sw?
 client/package-lock.json
 client/.nuxt
+!/.gitignore
 !/.gitignore
