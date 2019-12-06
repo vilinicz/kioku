@@ -6,8 +6,6 @@ import {
   globalHandleError
 } from './utils'
 
-import NuxtBuildIndicator from './components/nuxt-build-indicator'
-
 import '../assets/reset.scss'
 
 import _6f6c098b from '../layouts/default.vue'
@@ -15,7 +13,7 @@ import _6f6c098b from '../layouts/default.vue'
 const layouts = { "_default": _6f6c098b }
 
 export default {
-  head: {"title":"kioku","meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"hid":"description","name":"description","content":"My sublime Nuxt.js project"},{"hid":"mobile-web-app-capable","name":"mobile-web-app-capable","content":"yes"},{"hid":"apple-mobile-web-app-title","name":"apple-mobile-web-app-title","content":"kioku"},{"hid":"author","name":"author","content":"vilinicz"},{"hid":"og:type","name":"og:type","property":"og:type","content":"website"},{"hid":"og:title","name":"og:title","property":"og:title","content":"kioku"},{"hid":"og:site_name","name":"og:site_name","property":"og:site_name","content":"kioku"},{"hid":"og:description","name":"og:description","property":"og:description","content":"My sublime Nuxt.js project"}],"link":[{"rel":"icon","type":"image\u002Fx-icon","href":"\u002Ffavicon.ico"},{"rel":"manifest","href":"\u002F_nuxt\u002Fmanifest.3b3c5ac2.json"}],"style":[],"script":[],"htmlAttrs":{"lang":"en"}},
+  head: {"title":"kioku","meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"hid":"description","name":"description","content":"My sublime Nuxt.js project"},{"hid":"mobile-web-app-capable","name":"mobile-web-app-capable","content":"yes"},{"hid":"apple-mobile-web-app-title","name":"apple-mobile-web-app-title","content":"kioku"},{"hid":"author","name":"author","content":"vilinicz"},{"hid":"og:type","name":"og:type","property":"og:type","content":"website"},{"hid":"og:title","name":"og:title","property":"og:title","content":"kioku"},{"hid":"og:site_name","name":"og:site_name","property":"og:site_name","content":"kioku"},{"hid":"og:description","name":"og:description","property":"og:description","content":"My sublime Nuxt.js project"}],"link":[{"rel":"icon","type":"image\u002Fx-icon","href":"\u002Ffavicon.ico"},{"rel":"manifest","href":"\u002F_nuxt\u002Fmanifest.8bebed11.json"},{"rel":"shortcut icon","href":"\u002F_nuxt\u002Ficons\u002Ficon_64.92e8d8.png"},{"rel":"apple-touch-icon","href":"\u002F_nuxt\u002Ficons\u002Ficon_512.92e8d8.png","sizes":"512x512"}],"style":[],"script":[],"htmlAttrs":{"lang":"en"}},
 
   render (h, props) {
     const layoutEl = h(this.layout || 'nuxt')
@@ -47,7 +45,6 @@ export default {
       }
     }, [
 
-      h(NuxtBuildIndicator),
       transitionEl
     ])
   },
@@ -136,10 +133,6 @@ export default {
     },
 
     setLayout (layout) {
-      if(layout && typeof layout !== 'string') {
-        throw new Error('[nuxt] Avoid using non-string value as layout property.')
-      }
-
       if (!layout || !layouts['_' + layout]) {
         layout = 'default'
       }

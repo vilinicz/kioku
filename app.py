@@ -107,7 +107,7 @@ def shutdown():
 routes = [
     Route("/faces/{fid:int}", endpoint=get_face, methods=["GET"]),
     Route('/faces/{fid:int}', endpoint=update_face, methods=['PATCH']),
-    Route("/faces/", endpoint=get_faces, methods=["GET"]),
+    Route("/faces", endpoint=get_faces, methods=["GET"]),
     Route("/current_face/{cid:int}", endpoint=get_current_face,
           methods=["GET"]),
     Route("/stream/{cid:int}", endpoint=stream, methods=["GET"]),

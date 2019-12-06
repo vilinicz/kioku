@@ -1,6 +1,7 @@
 import io
 import os
 import sqlite3
+from contextlib import contextmanager
 
 import numpy as np
 
@@ -25,59 +26,16 @@ sqlite3.register_adapter(np.ndarray, adapt_array)
 sqlite3.register_converter("array", convert_array)
 
 
-def connect(db_path=DEFAULT_PATH):
-    con = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
-    return con
-
-
-def insert(name, encoding):
-    conn = connect()
-    cursor = conn.cursor()
-
-    cursor.execute('INSERT INTO faces (name, encoding) values (?, ?)',
-                   (name, encoding))
-
-    conn.commit()
-    conn.close()
-
-
-def update_face(fid, name, room, note):
-    conn = connect()
-    cursor = conn.cursor()
-
-    query = 'UPDATE faces set name = ?, room = ?, note = ? where id = ?'
-    values = (name, room, note, fid)
-    cursor.execute(query, values)
-    conn.commit()
-    conn.close()
-
-
-def faces():
-    conn = connect()
+@contextmanager
+def database(db_path=DEFAULT_PATH):
+    conn = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
     conn.row_factory = lambda c, r: dict(
         zip([col[0] for col in c.description], r))
-    cursor = conn.cursor()
 
-    cursor.execute('SELECT * from faces')
-    data = cursor.fetchall()
+    yield conn.cursor()
+
     conn.commit()
     conn.close()
-
-    return data
-
-
-def faces_public():
-    conn = connect()
-    conn.row_factory = lambda c, r: dict(
-        zip([col[0] for col in c.description], r))
-    cursor = conn.cursor()
-
-    cursor.execute('SELECT id, name from faces')
-    data = cursor.fetchall()
-    conn.commit()
-    conn.close()
-
-    return data
 
 
 class Face:
@@ -91,7 +49,9 @@ class Face:
 
     @classmethod
     def all_public(cls):
-        return faces_public()
+        with database() as db:
+            db.execute('SELECT id, name from faces')
+            return db.fetchall()
 
     @classmethod
     def find(cls, fid: int):
@@ -99,15 +59,22 @@ class Face:
 
     @classmethod
     def create(cls, name: str, encoding):
-        insert(name, encoding)
+        with database() as db:
+            db.execute('INSERT INTO faces (name, encoding) values (?, ?)',
+                       (name, encoding))
         cls.load()
 
     @classmethod
     def update(cls, fid: int, name: str, room: int, note: str):
-        update_face(fid, name, room, note)
+        query = 'UPDATE faces set name = ?, room = ?, note = ? where id = ?'
+        values = (name, room, note, fid)
+        with database() as db:
+            db.execute(query, values)
         cls.load()
         return cls.find(fid)
 
     @classmethod
     def load(cls):
-        cls.cache = faces()
+        with database() as db:
+            db.execute('SELECT * from faces')
+            cls.cache = db.fetchall()
