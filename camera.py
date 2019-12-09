@@ -11,21 +11,22 @@ import face_recognition
 import numpy as np
 
 from db import Face
+from face_groupper import FaceMetricsController
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
 # TODO buffer size should be in config.json
-buffer_size = 7
-buffer_time = datetime.now()
-face_locations = deque(maxlen=buffer_size)
-face_encodings = deque(maxlen=buffer_size)
-average = None
+# buffer_size = 7
+# buffer_time = datetime.now()
+# face_locations = deque(maxlen=buffer_size)
+# face_encodings = deque(maxlen=buffer_size)
+# average = None
 
 
 def detect(frame):
-    global average, face_locations, face_encodings, \
-        buffer_size, buffer_time
+    # global average, face_locations, face_encodings, \
+    #     buffer_size, buffer_time
 
     current_face = {}
 
@@ -42,30 +43,39 @@ def detect(frame):
 
     if process_this_frame:
         # Add to params model='cnn' to detect on GPU
-        fl = face_recognition.face_locations(rgb_small_frame)
+        fls = face_recognition.face_locations(rgb_small_frame)
 
-        if any(fl):
+        if any(fls):
             # TODO Recognise all faces instead one
-            fe = face_recognition.face_encodings(rgb_small_frame,
-                                                 [fl[0]])[0]
+            fes = face_recognition.face_encodings(rgb_small_frame, fls)
+
+            to_buffer = list(zip(fes, fls))
+            FaceMetricsController.put_metrics(face_data=to_buffer)
+
+            from_buffer = FaceMetricsController.get_active_groups()
 
             # Clear buffer if last frame is older then 1 second
-            if (datetime.now() - buffer_time).seconds > 1:
-                logger.debug('Clearing Buffer due timeout')
-                face_encodings.clear()
-                face_locations.clear()
+            # if (datetime.now() - buffer_time).seconds > 1:
+            #     logger.debug('Clearing Buffer due timeout')
+            #     face_encodings.clear()
+            #     face_locations.clear()
+            #
+            # face_encodings.append(fe)
+            # face_locations.append(fl[0])
+            # buffer_time = datetime.now()
 
-            face_encodings.append(fe)
-            face_locations.append(fl[0])
-            buffer_time = datetime.now()
+            if len(from_buffer) > 0:
+                face_encodings, face_locations = [],  []
+                for enc, loc in from_buffer:
+                    face_encodings.append(enc)
+                    face_locations.append(loc)
 
-            if len(face_encodings) == buffer_size:
                 average = np.mean(np.array(face_encodings), axis=0)
 
                 match = face_recognition.compare_faces(face_encodings,
                                                        average,
                                                        tolerance=0.29)
-                if sum(match) > buffer_size / 1.5:
+                if sum(match) > len(face_encodings) / 1.5:
                     matched_encodings = []
                     matched_locations = []
                     for fe, fl, m in zip(face_encodings, face_locations, match):
