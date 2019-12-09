@@ -66,13 +66,22 @@ def detect(frame):
                                                        average,
                                                        tolerance=0.29)
                 if sum(match) > buffer_size / 1.5:
+                    matched_encodings = []
+                    matched_locations = []
+                    for fe, fl, m in zip(face_encodings, face_locations, match):
+                        if m:
+                            matched_encodings.append(fe)
+                            matched_locations.append(fl)
+
+                    matched_average = np.mean(np.array(matched_encodings),
+                                              axis=0)
                     if not Face.all():
                         print('DB is empty. Insert first face')
-                        Face.create('', average)
+                        Face.create('', matched_average)
                     else:
                         for face in Face.all():
                             match = face_recognition.compare_faces(
-                                [average],
+                                [matched_average],
                                 face['encoding'],
                                 tolerance=0.6)
                             if all(match):
@@ -84,9 +93,10 @@ def detect(frame):
 
                         if not matched:
                             print('No Match. Insert new face')
-                            Face.create('', average)
+                            Face.create('', matched_average)
 
-                    top, right, bottom, left = face_locations[buffer_size - 1]
+                    top, right, bottom, left = matched_locations[
+                        len(matched_locations) - 1]
                     top = int(top * 4 * 0.6)
                     right = int(right * 4 * 1.08)
                     bottom = int(bottom * 4 * 1.05)
