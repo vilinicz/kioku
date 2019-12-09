@@ -96,7 +96,7 @@ def detect(frame):
                             Face.create('', matched_average)
 
                     top, right, bottom, left = matched_locations[
-                        len(matched_locations) - 1]
+                        len(matched_locations) - 3]
                     top = int(top * 4 * 0.6)
                     right = int(right * 4 * 1.08)
                     bottom = int(bottom * 4 * 1.05)

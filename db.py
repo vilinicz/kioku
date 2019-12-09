@@ -50,8 +50,7 @@ class Face:
     @classmethod
     def all_public(cls):
         with database() as db:
-            # TODO add room and note
-            db.execute('SELECT id, name from faces')
+            db.execute('SELECT id, name, room, note from faces')
             return db.fetchall()
 
     @classmethod

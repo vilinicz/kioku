@@ -8,7 +8,7 @@
         <div :class="{on: online}" class="status" />
       </div>
 
-      <form class="summary" action="#">
+      <div class="summary">
         <div class="wrap">
           <input
             v-model.lazy="editableName"
@@ -36,7 +36,7 @@
           type="text"
           class="input input-note"
         />
-      </form>
+      </div>
     </div>
   </div>
 </template>
