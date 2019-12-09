@@ -11,15 +11,15 @@
       <form class="summary" action="#">
         <div class="wrap">
           <input
-            v-model="editableName"
-            @change="update"
+            v-model.lazy="editableName"
+            v-debounce="delay"
             placeholder="Имя"
             type="text"
             class="input input-name"
           >
           <input
-            v-model="editableRoom"
-            @change="update"
+            v-model.lazy="editableRoom"
+            v-debounce="delay"
             placeholder="#"
             type="number"
             min="0"
@@ -29,8 +29,8 @@
           >
         </div>
         <textarea
-          v-model="editableNote"
-          @change="update"
+          v-model.lazy="editableNote"
+          v-debounce="delay"
           rows="4"
           placeholder="Дополнительно"
           type="text"
@@ -42,8 +42,13 @@
 </template>
 
 <script>
+import debounce from 'v-debounce'
 export default {
   name: 'FaceCard',
+
+  directives: {
+    debounce
+  },
 
   props: {
     id: {
@@ -80,7 +85,20 @@ export default {
       editableNote: this.note,
 
       refreshing: null,
-      online: true
+      online: true,
+      delay: 400
+    }
+  },
+
+  watch: {
+    editableName () {
+      this.update()
+    },
+    editableRoom () {
+      this.update()
+    },
+    editableNote () {
+      this.update()
     }
   },
 
@@ -94,6 +112,7 @@ export default {
 
   methods: {
     async update () {
+      console.log('update')
       const payload = {
         name: this.editableName,
         room: this.editableRoom,
