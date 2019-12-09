@@ -62,30 +62,32 @@ export default {
     },
 
     async get () {
-      let newFace = {}
+      let newFaces = []
       try {
-        const res = await this.$axios.get('/current_face/1')
-        newFace = res.data
+        const res = await this.$axios.get('/current_faces/1')
+        newFaces = res.data
         this.error = undefined
       } catch (e) {
         this.error = e
       }
 
-      if (newFace.id) {
-        newFace.datetime = Date.now()
+      for (const newFace of newFaces) {
+        if (newFace.id) {
+          newFace.datetime = Date.now()
 
-        const oldFace = this.faces.find(f => f.id === newFace.id)
+          const oldFace = this.faces.find(f => f.id === newFace.id)
 
-        if (oldFace) {
-          if (((Date.now() - oldFace.datetime) / 1000) > 3) {
-            oldFace.image = newFace.image
+          if (oldFace) {
+            if (((Date.now() - oldFace.datetime) / 1000) > 3) {
+              oldFace.image = newFace.image
+            }
+            oldFace.datetime = Date.now()
+          } else {
+            if (this.faces.length === 8) {
+              this.faces.pop()
+            }
+            this.faces.unshift(newFace)
           }
-          oldFace.datetime = Date.now()
-        } else {
-          if (this.faces.length === 8) {
-            this.faces.pop()
-          }
-          this.faces.unshift(newFace)
         }
       }
     }
@@ -99,7 +101,7 @@ export default {
   line-height: 1.6;
   // padding: 2vw 0;
   min-height: 100vh;
-  font-family: "Avenir Next",sans-serif;
+  font-family: "Avenir Next", sans-serif;
   // background: linear-gradient(to bottom, $gray-silver, $gray-lightest);
 
   input {

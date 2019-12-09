@@ -38,13 +38,14 @@ async def update_face(request):
     return JSONResponse(res)
 
 
-async def get_current_face(request):
+async def get_current_faces(request):
     cid = request.path_params['cid']
     camera = next(filter(lambda c: c.cid == cid, cameras), None)
-    cf = camera.current_face
-    if 'encoding' in cf:
-        del cf['encoding']
-    res = cf
+    cfs = camera.current_faces
+    for cf in cfs:
+        if 'encoding' in cf:
+            del cf['encoding']
+    res = cfs
 
     return JSONResponse(res)
 
@@ -108,7 +109,7 @@ routes = [
     Route("/faces/{fid:int}", endpoint=get_face, methods=["GET"]),
     Route('/faces/{fid:int}', endpoint=update_face, methods=['PATCH']),
     Route("/faces", endpoint=get_faces, methods=["GET"]),
-    Route("/current_face/{cid:int}", endpoint=get_current_face,
+    Route("/current_faces/{cid:int}", endpoint=get_current_faces,
           methods=["GET"]),
     Route("/stream/{cid:int}", endpoint=stream, methods=["GET"]),
     Route("/stop", endpoint=stop, methods=["GET"]),

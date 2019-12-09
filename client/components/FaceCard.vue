@@ -112,7 +112,6 @@ export default {
 
   methods: {
     async update () {
-      console.log('update')
       const payload = {
         name: this.editableName,
         room: this.editableRoom,

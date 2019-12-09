@@ -135,7 +135,7 @@ class Camera:
         self.stream = open_stream(url, lat, width, height)
         self.frame = None
         self.frame_face = None
-        self.current_face = {}
+        self.current_faces = []
         self.current_face_time = datetime.now()
 
         self.jpeg_quality = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
@@ -185,10 +185,10 @@ class Camera:
                 ok, ff, cf = detect(f)
                 if ok:
                     self.frame_face = ff
-                    self.current_face = cf
+                    self.current_faces = [cf]
                     self.current_face_time = datetime.now()
                 elif (datetime.now() - self.current_face_time).seconds > 2:
-                    self.current_face = {}
+                    self.current_faces = []
                     self.frame_face = None
             except Exception as e:
                 print('Frame detect() error', e)
