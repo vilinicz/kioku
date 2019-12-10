@@ -3,6 +3,9 @@ import math
 import statistics
 from collections import deque
 
+import face_recognition
+import numpy as np
+
 
 class FaceMetricsController:
     # Время жизни групп метрик. Если группа не обновлялась больше указанного
@@ -108,9 +111,10 @@ class FaceMetricsGroup:
     #  текущей группы
     def calculate_similarity(self, face_metrics):
         match_results = [None] * self.face_data_stack.__len__()
+
         for face_idx in range(self.face_data_stack.__len__()):
             face = self.face_data_stack[face_idx][0]
-            assert isinstance(face, list)
+            # assert isinstance(face, list)
             matched_metrics_cnt = 0
             for metric_idx in range(face.__len__()):
                 if math.fabs(face[metric_idx] - face_metrics[metric_idx]) < 0.6:

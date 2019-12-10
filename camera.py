@@ -22,11 +22,14 @@ logger.setLevel(logging.DEBUG)
 # face_locations = deque(maxlen=buffer_size)
 # face_encodings = deque(maxlen=buffer_size)
 # average = None
+buffer = FaceMetricsController()
 
 
 def detect(frame):
     # global average, face_locations, face_encodings, \
     #     buffer_size, buffer_time
+
+    global buffer
 
     current_face = {}
 
@@ -49,10 +52,11 @@ def detect(frame):
             # TODO Recognise all faces instead one
             fes = face_recognition.face_encodings(rgb_small_frame, fls)
 
-            to_buffer = list(zip(fes, fls))
-            FaceMetricsController.put_metrics(face_data=to_buffer)
+            for fe, fl in zip(fes, fls):
+                # print(list(fe))
+                buffer.put_metrics(face_data=(list(fe), fl))
 
-            from_buffer = FaceMetricsController.get_active_groups()
+            from_buffer = buffer.get_active_groups()
 
             # Clear buffer if last frame is older then 1 second
             # if (datetime.now() - buffer_time).seconds > 1:
@@ -65,61 +69,65 @@ def detect(frame):
             # buffer_time = datetime.now()
 
             if len(from_buffer) > 0:
-                face_encodings, face_locations = [],  []
-                for enc, loc in from_buffer:
-                    face_encodings.append(enc)
-                    face_locations.append(loc)
+                for group in from_buffer:
+                    face_encodings = []
+                    face_locations = []
+                    for face_data in group:
+                        fe, fl = face_data
+                        face_encodings.append(fe)
+                        face_locations.append(fl)
 
-                average = np.mean(np.array(face_encodings), axis=0)
+                    average = np.mean(np.array(face_encodings), axis=0)
 
-                match = face_recognition.compare_faces(face_encodings,
-                                                       average,
-                                                       tolerance=0.29)
-                if sum(match) > len(face_encodings) / 1.5:
-                    matched_encodings = []
-                    matched_locations = []
-                    for fe, fl, m in zip(face_encodings, face_locations, match):
-                        if m:
-                            matched_encodings.append(fe)
-                            matched_locations.append(fl)
+                    match = face_recognition.compare_faces(face_encodings,
+                                                           average,
+                                                           tolerance=0.29)
+                    if sum(match) > len(face_encodings) / 1.5:
+                        matched_encodings = []
+                        matched_locations = []
+                        for fe, fl, m in zip(face_encodings, face_locations,
+                                             match):
+                            if m:
+                                matched_encodings.append(fe)
+                                matched_locations.append(fl)
 
-                    matched_average = np.mean(np.array(matched_encodings),
-                                              axis=0)
-                    if not Face.all():
-                        print('DB is empty. Insert first face')
-                        Face.create('', matched_average)
-                    else:
-                        for face in Face.all():
-                            match = face_recognition.compare_faces(
-                                [matched_average],
-                                face['encoding'],
-                                tolerance=0.6)
-                            if all(match):
-                                current_face = face.copy()
-                                # logger.debug('Match with: %s, %s',
-                                #              face['name'], face['id'])
-                                matched = True
-                                break
-
-                        if not matched:
-                            print('No Match. Insert new face')
+                        matched_average = np.mean(np.array(matched_encodings),
+                                                  axis=0)
+                        if not Face.all():
+                            print('DB is empty. Insert first face')
                             Face.create('', matched_average)
+                        else:
+                            for face in Face.all():
+                                match = face_recognition.compare_faces(
+                                    [matched_average],
+                                    face['encoding'],
+                                    tolerance=0.6)
+                                if all(match):
+                                    current_face = face.copy()
+                                    # logger.debug('Match with: %s, %s',
+                                    #              face['name'], face['id'])
+                                    matched = True
+                                    break
 
-                    top, right, bottom, left = matched_locations[
-                        len(matched_locations) - 3]
-                    top = int(top * 4 * 0.6)
-                    right = int(right * 4 * 1.08)
-                    bottom = int(bottom * 4 * 1.05)
-                    left = int(left * 4 * 0.92)
+                            if not matched:
+                                print('No Match. Insert new face')
+                                Face.create('', matched_average)
 
-                    frame_face = frame[top:bottom, left:right]
+                        top, right, bottom, left = matched_locations[
+                            len(matched_locations) - 3]
+                        top = int(top * 4 * 0.6)
+                        right = int(right * 4 * 1.08)
+                        bottom = int(bottom * 4 * 1.05)
+                        left = int(left * 4 * 0.92)
 
-                    ok, encoded = cv2.imencode(".jpg", frame_face)
-                    fbytes = b64encode(encoded)
-                    fstring = fbytes.decode('utf-8')
-                    current_face['image'] = fstring
+                        frame_face = frame[top:bottom, left:right]
 
-                    return True, frame_face, current_face
+                        ok, encoded = cv2.imencode(".jpg", frame_face)
+                        fbytes = b64encode(encoded)
+                        fstring = fbytes.decode('utf-8')
+                        current_face['image'] = fstring
+
+                        return True, frame_face, current_face
 
     return False, None, current_face
 
