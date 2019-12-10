@@ -11,27 +11,21 @@ import face_recognition
 import numpy as np
 
 from db import Face
-from face_groupper import FaceMetricsController
+from buffer import Buffer
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-# TODO buffer size should be in config.json
-# buffer_size = 7
-# buffer_time = datetime.now()
-# face_locations = deque(maxlen=buffer_size)
-# face_encodings = deque(maxlen=buffer_size)
-# average = None
-buffer = FaceMetricsController()
+buffer = Buffer()
 
 
 def detect(frame):
-    # global average, face_locations, face_encodings, \
-    #     buffer_size, buffer_time
-
     global buffer
 
     current_face = {}
+    current_faces = []
+
+    frame_face = None
 
     matched = False
 
@@ -51,31 +45,21 @@ def detect(frame):
         if any(fls):
             # TODO Recognise all faces instead one
             fes = face_recognition.face_encodings(rgb_small_frame, fls)
-
             for fe, fl in zip(fes, fls):
-                # print(list(fe))
-                buffer.put_metrics(face_data=(list(fe), fl))
+                buffer.add(face=(fe, fl, frame))
 
             from_buffer = buffer.get_active_groups()
-
-            # Clear buffer if last frame is older then 1 second
-            # if (datetime.now() - buffer_time).seconds > 1:
-            #     logger.debug('Clearing Buffer due timeout')
-            #     face_encodings.clear()
-            #     face_locations.clear()
-            #
-            # face_encodings.append(fe)
-            # face_locations.append(fl[0])
-            # buffer_time = datetime.now()
 
             if len(from_buffer) > 0:
                 for group in from_buffer:
                     face_encodings = []
                     face_locations = []
+                    face_frames = []
                     for face_data in group:
-                        fe, fl = face_data
+                        fe, fl, fr = face_data
                         face_encodings.append(fe)
                         face_locations.append(fl)
+                        face_frames.append(fr)
 
                     average = np.mean(np.array(face_encodings), axis=0)
 
@@ -85,11 +69,13 @@ def detect(frame):
                     if sum(match) > len(face_encodings) / 1.5:
                         matched_encodings = []
                         matched_locations = []
-                        for fe, fl, m in zip(face_encodings, face_locations,
-                                             match):
+                        matched_frames = []
+                        for fe, fl, fr, m in zip(face_encodings, face_locations,
+                                                 face_frames, match):
                             if m:
                                 matched_encodings.append(fe)
                                 matched_locations.append(fl)
+                                matched_frames.append(fr)
 
                         matched_average = np.mean(np.array(matched_encodings),
                                                   axis=0)
@@ -104,8 +90,6 @@ def detect(frame):
                                     tolerance=0.6)
                                 if all(match):
                                     current_face = face.copy()
-                                    # logger.debug('Match with: %s, %s',
-                                    #              face['name'], face['id'])
                                     matched = True
                                     break
 
@@ -113,23 +97,23 @@ def detect(frame):
                                 print('No Match. Insert new face')
                                 Face.create('', matched_average)
 
-                        top, right, bottom, left = matched_locations[
-                            len(matched_locations) - 3]
+                        top, right, bottom, left = matched_locations[-3]
                         top = int(top * 4 * 0.6)
                         right = int(right * 4 * 1.08)
                         bottom = int(bottom * 4 * 1.05)
                         left = int(left * 4 * 0.92)
 
-                        frame_face = frame[top:bottom, left:right]
+                        frame_face = matched_frames[-3][top:bottom, left:right]
 
                         ok, encoded = cv2.imencode(".jpg", frame_face)
                         fbytes = b64encode(encoded)
                         fstring = fbytes.decode('utf-8')
                         current_face['image'] = fstring
+                        current_faces.append(current_face)
 
-                        return True, frame_face, current_face
+            return True, frame_face, current_faces
 
-    return False, None, current_face
+    return False, None, current_faces
 
 
 def open_stream(url, lat, width, height):
@@ -213,7 +197,7 @@ class Camera:
                 ok, ff, cf = detect(f)
                 if ok:
                     self.frame_face = ff
-                    self.current_faces = [cf]
+                    self.current_faces = cf
                     self.current_face_time = datetime.now()
                 elif (datetime.now() - self.current_face_time).seconds > 2:
                     self.current_faces = []
