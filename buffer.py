@@ -30,7 +30,7 @@ class Buffer:
     def get_active_groups(self):
         return [
             g.faces for g in
-            filter(lambda g: len(g.faces) >= 8, self.groups)
+            filter(lambda g: len(g.faces) >= self.size, self.groups)
         ]
 
     # Delete old groups
