@@ -16,7 +16,7 @@ from buffer import Buffer
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-buffer = Buffer()
+buffer = Buffer(size=6)
 
 
 def detect(frame):
@@ -43,7 +43,6 @@ def detect(frame):
         fls = face_recognition.face_locations(rgb_small_frame)
 
         if any(fls):
-            # TODO Recognise all faces instead one
             fes = face_recognition.face_encodings(rgb_small_frame, fls)
             for fe, fl in zip(fes, fls):
                 buffer.add(face=(fe, fl, frame))
@@ -111,7 +110,7 @@ def detect(frame):
                         current_face['image'] = fstring
                         current_faces.append(current_face)
 
-            return True, frame_face, current_faces
+                return True, frame_face, current_faces
 
     return False, None, current_faces
 

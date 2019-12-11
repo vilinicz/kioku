@@ -6,7 +6,7 @@ import numpy as np
 
 class Buffer:
     def __init__(self, size: int = 8, lifetime: int = 3,
-                 tolerance: float = 0.55):
+                 tolerance: float = 0.6):
         self.groups = []
         self.size = size
         self.lifetime = lifetime
@@ -24,13 +24,15 @@ class Buffer:
         if any(self.groups) and min(d) < self.tolerance:
             self.groups[d.index(min(d))].add(face)
         else:
+            # Increase size for potentially unknown face
+            # size = self.size * 2 if any(self.groups) else self.size
             self.groups.append(Group(face, self.size))
 
     # Return full groups
     def get_active_groups(self):
         return [
             g.faces for g in
-            filter(lambda g: len(g.faces) >= self.size, self.groups)
+            filter(lambda g: len(g.faces) >= g.size, self.groups)
         ]
 
     # Delete old groups
@@ -43,6 +45,7 @@ class Buffer:
 
 class Group:
     def __init__(self, face, size: int = 8):
+        self.size = size
         self.faces = deque(maxlen=size)
         self.timestamp = datetime.now()
         self.add(face)
