@@ -69,7 +69,7 @@ export default {
 
   axios: {
     // TEMP
-    baseURL: process.env.BASE_URL || '//192.168.1.254:8000/'
+    baseURL: process.env.BASE_URL || '//192.168.1.33:8000/'
   },
   /*
   ** Build configuration
