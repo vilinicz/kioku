@@ -16,7 +16,7 @@ from buffer import Buffer
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-buffer = Buffer(size=6)
+buffer = Buffer(size=8)
 
 
 def detect(frame):
