@@ -16,7 +16,7 @@ from buffer import Buffer
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-buffer = Buffer(size=8)
+buffer = Buffer(size=6)
 
 
 def detect(frame):
@@ -32,7 +32,7 @@ def detect(frame):
     process_this_frame = True
 
     try:
-        small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+        small_frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
         rgb_small_frame = small_frame[:, :, ::-1]
     except Exception as e:
         process_this_frame = False
@@ -86,7 +86,7 @@ def detect(frame):
                                 match = face_recognition.compare_faces(
                                     [matched_average],
                                     face['encoding'],
-                                    tolerance=0.6)
+                                    tolerance=0.5)
                                 if all(match):
                                     current_face = face.copy()
                                     matched = True
@@ -97,10 +97,10 @@ def detect(frame):
                                 Face.create('', matched_average)
 
                         top, right, bottom, left = matched_locations[-3]
-                        top = int(top * 4 * 0.6)
-                        right = int(right * 4 * 1.08)
-                        bottom = int(bottom * 4 * 1.05)
-                        left = int(left * 4 * 0.92)
+                        top = int(top * 2 * 0.6)
+                        right = int(right * 2 * 1.08)
+                        bottom = int(bottom * 2 * 1.05)
+                        left = int(left * 2 * 0.92)
 
                         frame_face = matched_frames[-3][top:bottom, left:right]
 
