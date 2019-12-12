@@ -116,7 +116,7 @@ def detect(frame):
 
 
 def open_stream(url, lat, width, height):
-    str = (
+    gstr = (
             f'nvarguscamerasrc ! video/x-raw(memory:NVMM), ' +
             f'width=(int){width}, height=(int){height}, ' +
             f'format=(string)NV12, framerate=(fraction)30/1 ! ' +
@@ -134,7 +134,7 @@ def open_stream(url, lat, width, height):
                                                                      height)
     if platform.machine() == "aarch64":
         print('Running on Jetson')
-        return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
+        return cv2.VideoCapture(gstr, cv2.CAP_GSTREAMER)
     else:
         print('Running locally')
         vs = cv2.VideoCapture(url)
