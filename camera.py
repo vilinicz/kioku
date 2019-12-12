@@ -132,7 +132,8 @@ def open_stream(url, lat, width, height):
                'videoconvert ! appsink drop=true sync=false').format(url, lat,
                                                                      width,
                                                                      height)
-    if False #platform.machine() == "aarch64":
+    if False:
+        # platform.machine() == "aarch64":
         print('Running on Jetson')
         return cv2.VideoCapture(gstr, cv2.CAP_GSTREAMER)
     else:
