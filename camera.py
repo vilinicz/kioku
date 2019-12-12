@@ -116,6 +116,14 @@ def detect(frame):
 
 
 def open_stream(url, lat, width, height):
+    str = (
+            f'nvarguscamerasrc ! video/x-raw(memory:NVMM), ' +
+            f'width=(int){width}, height=(int){height}, ' +
+            f'format=(string)NV12, framerate=(fraction)30/1 ! ' +
+            f'nvvidconv flip-method=0 ! ' +
+            f'video/x-raw, width=(int){width}, height=(int){height}, format=(string)BGRx ! ' +
+            'videoconvert ! video/x-raw, format=(string)BGR ! appsink'
+    )
     gst_str = ('rtspsrc location={} latency={} ! queue ! '
                'rtph264depay ! h264parse ! omxh264dec ! '
                'nvvidconv ! '
