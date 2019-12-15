@@ -138,8 +138,6 @@ def open_stream(ctype, url, lat, width, height):
             # return cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
             string = '/dev/video{}'.format(url)
             vs = cv2.VideoCapture(string)
-            vs.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-            vs.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
             return vs
     else:
         print("Running Locally")
