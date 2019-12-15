@@ -89,7 +89,8 @@ async def stream(request):
 def startup():
     global cameras
     for c in cc:
-        ccc = Camera(c['id'], c['url'], c['lat'], c['width'], c['height'])
+        ccc = Camera(c['id'], c['type'], c['url'], c['lat'], c['width'],
+                     c['height'])
         ccc.start()
         cameras.append(
             ccc

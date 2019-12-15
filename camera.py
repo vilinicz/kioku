@@ -115,7 +115,7 @@ def detect(frame):
     return False, None, current_faces
 
 
-def open_stream(url, lat, width, height):
+def open_stream(ctype, url, lat, width, height):
     gst_str = ('rtspsrc location={} latency={} ! queue ! '
                'rtph264depay ! h264parse ! omxh264dec ! '
                'nvvidconv ! '
@@ -124,11 +124,9 @@ def open_stream(url, lat, width, height):
                'videoconvert ! appsink drop=true sync=false').format(url, lat,
                                                                      width,
                                                                      height)
-    if platform.machine() == "aarch64":
-        print('Running on Jetson')
+    if platform.machine() == "aarch64" and ctype == 'rtsp':
         return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
     else:
-        print('Running locally')
         vs = cv2.VideoCapture(url)
         vs.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         vs.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
@@ -136,14 +134,15 @@ def open_stream(url, lat, width, height):
 
 
 class Camera:
-    def __init__(self, cid, url, lat, width, height):
+    def __init__(self, cid, ctype, url, lat, width, height):
+        self.ctype = ctype
         self.cid = cid
         self.url = url
         self.lat = lat
         self.width = width
         self.height = height
 
-        self.stream = open_stream(url, lat, width, height)
+        self.stream = open_stream(ctype, url, lat, width, height)
         self.frame = None
         self.frame_face = None
         self.current_faces = []
