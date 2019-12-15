@@ -128,8 +128,8 @@ def open_stream(ctype, url, lat, width, height):
         return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
     else:
         vs = cv2.VideoCapture(url)
-        vs.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-        vs.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+        # vs.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        # vs.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         return vs
 
 
@@ -189,6 +189,7 @@ class Camera:
                 continue
             count = 0
 
+            print("Frame read")
             self.frame = f.copy()
 
             try:
