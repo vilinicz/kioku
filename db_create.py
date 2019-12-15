@@ -1,22 +1,15 @@
 #!/usr/bin/env python3
 
-import db
+from db import database
 
-conn = db.connect()
-
-cur = conn.cursor()
-
-create_db = """
-CREATE TABLE faces (
-    id INTEGER,
-    name VARCHAR,
-    room INTEGER,
-    note TEXT,
-    encoding array,
-    PRIMARY KEY (id));
-"""
-
-cur.executescript(create_db)
-
-conn.commit()
-conn.close()
+with database() as db:
+    create_db = """
+        CREATE TABLE faces (
+        id INTEGER,
+        name VARCHAR,
+        room INTEGER,
+        note TEXT,
+        encoding array,
+        PRIMARY KEY (id));
+    """
+    db.executescript(create_db)
