@@ -142,7 +142,7 @@ class Camera:
         self.width = width
         self.height = height
 
-        self.stream = open_stream(ctype, url, lat, width, height)
+        self.stream = None
         self.frame = None
         self.frame_face = None
         self.current_faces = []
@@ -161,17 +161,19 @@ class Camera:
             f = image.read()
             self.placeholder = f
 
-        if not self.stream.isOpened():
-            # TODO maybe retry instead of raise error
-            raise RuntimeError("Could not start video.")
-        else:
-            print(self.stream.isOpened())
-
     def start(self):
         self.thread.start()
         return self
 
     def run(self):
+        self.stream = open_stream(self.ctype, self.url, self.lat, self.width,
+                                  self.height)
+
+        if not self.stream.isOpened():
+            # TODO maybe retry instead of raise error
+            raise RuntimeError("Could not start video.")
+        else:
+            print(self.stream.isOpened())
         count = 0
         while not self.stopped:
             (g, f) = self.stream.read()
