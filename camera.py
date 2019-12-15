@@ -179,6 +179,9 @@ class Camera:
             (g, f) = self.stream.read()
 
             if not g:
+                print(
+                    "FAILED TO TAKE FRAME"
+                )
                 self.stream = open_stream(self.ctype, self.url, self.lat,
                                           self.width, self.height)
                 continue
