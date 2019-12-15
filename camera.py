@@ -130,6 +130,7 @@ def open_stream(ctype, url, lat, width, height):
 
     if platform.machine() == "aarch64":
         print("Running on Jetson")
+        print(gst_usb)
         if ctype == 'rtsp':
             return cv2.VideoCapture(gst_rtsp, cv2.CAP_GSTREAMER)
         else:
