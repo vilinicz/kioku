@@ -5,8 +5,8 @@ import numpy as np
 
 
 class Buffer:
-    def __init__(self, size: int = 10, lifetime: int = 3,
-                 tolerance: float = 0.5):
+    def __init__(self, size: int = 8, lifetime: int = 3,
+                 tolerance: float = 0.6):
         self.groups = []
         self.size = size
         self.lifetime = lifetime

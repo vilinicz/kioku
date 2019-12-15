@@ -2,14 +2,21 @@
 
 import db
 
-with db.database() as db:
-    create_db = """
-    CREATE TABLE faces (
+conn = db.connect()
+
+cur = conn.cursor()
+
+create_db = """
+CREATE TABLE faces (
     id INTEGER,
     name VARCHAR,
     room INTEGER,
     note TEXT,
     encoding array,
     PRIMARY KEY (id));
-    """
-    db.executescript(create_db)
+"""
+
+cur.executescript(create_db)
+
+conn.commit()
+conn.close()

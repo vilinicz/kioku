@@ -32,7 +32,7 @@ def detect(frame):
     process_this_frame = True
 
     try:
-        small_frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
+        small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
         rgb_small_frame = small_frame[:, :, ::-1]
     except Exception as e:
         process_this_frame = False
@@ -86,7 +86,7 @@ def detect(frame):
                                 match = face_recognition.compare_faces(
                                     [matched_average],
                                     face['encoding'],
-                                    tolerance=0.5)
+                                    tolerance=0.6)
                                 if all(match):
                                     current_face = face.copy()
                                     matched = True
@@ -97,10 +97,10 @@ def detect(frame):
                                 Face.create('', matched_average)
 
                         top, right, bottom, left = matched_locations[-3]
-                        top = int(top * 2 * 0.6)
-                        right = int(right * 2 * 1.08)
-                        bottom = int(bottom * 2 * 1.05)
-                        left = int(left * 2 * 0.92)
+                        top = int(top * 4 * 0.6)
+                        right = int(right * 4 * 1.08)
+                        bottom = int(bottom * 4 * 1.05)
+                        left = int(left * 4 * 0.92)
 
                         frame_face = matched_frames[-3][top:bottom, left:right]
 
@@ -116,14 +116,6 @@ def detect(frame):
 
 
 def open_stream(url, lat, width, height):
-    gstr = (
-            f'nvarguscamerasrc ! video/x-raw(memory:NVMM), ' +
-            f'width=(int){width}, height=(int){height}, ' +
-            f'format=(string)NV12, framerate=(fraction)30/1 ! ' +
-            f'nvvidconv flip-method=0 ! ' +
-            f'video/x-raw, width=(int){width}, height=(int){height}, format=(string)BGRx ! ' +
-            'videoconvert ! video/x-raw, format=(string)BGR ! appsink'
-    )
     gst_str = ('rtspsrc location={} latency={} ! queue ! '
                'rtph264depay ! h264parse ! omxh264dec ! '
                'nvvidconv ! '
@@ -132,16 +124,15 @@ def open_stream(url, lat, width, height):
                'videoconvert ! appsink drop=true sync=false').format(url, lat,
                                                                      width,
                                                                      height)
-    # if False:
-    #     # platform.machine() == "aarch64":
-    #     print('Running on Jetson')
-    #     return cv2.VideoCapture(gstr, cv2.CAP_GSTREAMER)
-    # else:
-    print('Running locally JETSON')
-    vs = cv2.VideoCapture(url)
-    # vs.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-    # vs.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-    return vs
+    if platform.machine() == "aarch64":
+        print('Running on Jetson')
+        return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
+    else:
+        print('Running locally')
+        vs = cv2.VideoCapture(url)
+        vs.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        vs.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+        return vs
 
 
 class Camera:
