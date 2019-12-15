@@ -191,6 +191,10 @@ $padding-md: 2rem;
     }
   }
 
+  .summary {
+    width: 100%;
+  }
+
   .wrap {
     display: flex;
     flex-flow: row nowrap;

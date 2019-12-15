@@ -63,14 +63,14 @@ export default {
   ** Axios module configuration
   ** See https://axios.nuxtjs.org/options
   */
-  env: {
-    BASE_URL: process.env.BASE_URL
-  },
+  // env: {
+  //   BASE_URL: process.env.BASE_URL
+  // },
 
-  axios: {
-    // TEMP
-    baseURL: process.env.BASE_URL || '//192.168.1.254:8000/'
-  },
+  // axios: {
+  //   // TEMP
+  //   baseURL: process.env.BASE_URL || '//192.168.1.254:8000/'
+  // },
   /*
   ** Build configuration
   */
