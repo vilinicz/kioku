@@ -138,7 +138,7 @@ def open_stream(ctype, url, lat, width, height):
             return cv2.VideoCapture(gst_rtsp, cv2.CAP_GSTREAMER)
         else:
             # return cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
-            string = 'dev/video{}'.format(url)
+            string = '/dev/video{}'.format(url)
             return cv2.VideoCapture(string)
     else:
         print("Running Locally")
@@ -209,7 +209,6 @@ class Camera:
                 continue
             count = 0
 
-            print("Frame read")
             self.frame = f.copy()
 
             try:
