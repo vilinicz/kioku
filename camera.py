@@ -127,9 +127,9 @@ def open_stream(ctype, url, lat, width, height):
 
     gst_usb = 'v4l2src device=/dev/video{} ! video/x-raw, width=(int){}, ' \
               'height=(int){}, framerate=(fraction){}/1 ! videoconvert !  ' \
-              'video/x-raw, , format=(string)BGR ! appsink'.format(url,
-                                                                   width,
-                                                                   height, 30)
+              'video/x-raw, , format=(string)BGRx ! appsink'.format(url,
+                                                                    width,
+                                                                    height, 30)
 
     if platform.machine() == "aarch64":
         print("Running on Jetson")
