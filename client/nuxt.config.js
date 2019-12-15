@@ -1,4 +1,5 @@
 require('dotenv').config()
+const development = process.env.NODE_ENV !== 'production'
 
 export default {
   mode: 'spa',
@@ -67,10 +68,9 @@ export default {
   //   BASE_URL: process.env.BASE_URL
   // },
 
-  // axios: {
-  //   // TEMP
-  //   baseURL: process.env.BASE_URL || '//192.168.1.254:8000/'
-  // },
+  axios: {
+    baseURL: development ? '//192.168.1.254:8000/' : process.env.BASE_URL
+  },
   /*
   ** Build configuration
   */

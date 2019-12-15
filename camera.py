@@ -116,20 +116,29 @@ def detect(frame):
 
 
 def open_stream(ctype, url, lat, width, height):
-    gst_str = ('rtspsrc location={} latency={} ! queue ! '
-               'rtph264depay ! h264parse ! omxh264dec ! '
-               'nvvidconv ! '
-               'video/x-raw, width=(int){}, height=(int){}, '
-               'format=(string)BGRx ! '
-               'videoconvert ! appsink drop=true sync=false').format(url, lat,
-                                                                     width,
-                                                                     height)
-    if platform.machine() == "aarch64" and ctype == 'rtsp':
-        return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
+    gst_rtsp = ('rtspsrc location={} latency={} ! queue ! '
+                'rtph264depay ! h264parse ! omxh264dec ! '
+                'nvvidconv ! '
+                'video/x-raw, width=(int){}, height=(int){}, '
+                'format=(string)BGRx ! '
+                'videoconvert ! appsink drop=true sync=false').format(url, lat,
+                                                                      width,
+                                                                      height)
+    gst_usb = ('v4l2src device=/dev/video{} ! '
+               'video/x-raw, width=(int){}, height=(int){} ! '
+               'videoconvert ! appsink').format(url, width, height)
+
+    if platform.machine() == "aarch64":
+        print("Running on Jetson")
+        if ctype == 'rtsp':
+            return cv2.VideoCapture(gst_rtsp, cv2.CAP_GSTREAMER)
+        else:
+            return cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
     else:
+        print("Running Locally")
         vs = cv2.VideoCapture(url)
-        # vs.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-        # vs.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+        vs.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        vs.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         return vs
 
 
