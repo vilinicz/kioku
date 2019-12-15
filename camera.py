@@ -137,7 +137,9 @@ def open_stream(ctype, url, lat, width, height):
         if ctype == 'rtsp':
             return cv2.VideoCapture(gst_rtsp, cv2.CAP_GSTREAMER)
         else:
-            return cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
+            # return cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
+            string = 'dev/video{}'.format(url)
+            return cv2.VideoCapture(string)
     else:
         print("Running Locally")
         vs = cv2.VideoCapture(url)
