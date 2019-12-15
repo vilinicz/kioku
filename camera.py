@@ -178,10 +178,10 @@ class Camera:
         while not self.stopped:
             (g, f) = self.stream.read()
 
-            # if not g:
-            #     self.stream = open_stream(self.url, self.lat,
-            #                               self.width, self.height)
-            #     continue
+            if not g:
+                self.stream = open_stream(self.ctype, self.url, self.lat,
+                                          self.width, self.height)
+                continue
 
             if np.shape(f) == () or np.sum(f) == 0:
                 continue
