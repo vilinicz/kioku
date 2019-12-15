@@ -123,7 +123,7 @@ def open_stream(ctype, url, lat, width, height):
                 'videoconvert ! appsink drop=true sync=false').format(url, lat,
                                                                       width,
                                                                       height)
-
+    # TODO Gstreamer not working
     gst_usb = 'v4l2src device=/dev/video{} ! video/x-raw, width=(int){}, ' \
               'height=(int){}, framerate=(fraction){}/1 ! videoconvert ! ' \
               'video/x-raw, format=(string)BGRx ! appsink'.format(url,
@@ -132,13 +132,15 @@ def open_stream(ctype, url, lat, width, height):
 
     if platform.machine() == "aarch64":
         print("Running on Jetson")
-        print(gst_usb)
         if ctype == 'rtsp':
             return cv2.VideoCapture(gst_rtsp, cv2.CAP_GSTREAMER)
         else:
             # return cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
             string = '/dev/video{}'.format(url)
-            return cv2.VideoCapture(string)
+            vs = cv2.VideoCapture(string)
+            vs.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+            vs.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+            return vs
     else:
         print("Running Locally")
         vs = cv2.VideoCapture(url)
@@ -236,7 +238,8 @@ class Camera:
                     yield self.placeholder
                     await asyncio.sleep(0.5)
             else:
-                f = cv2.resize(self.frame.copy(), (0, 0), fx=0.5, fy=0.5)
+                # f = cv2.resize(self.frame.copy(), (0, 0), fx=0.5, fy=0.5)
+                f = self.frame.copy()
                 ok, encoded = cv2.imencode(".jpg", f, self.jpeg_quality)
                 if not ok:
                     continue
