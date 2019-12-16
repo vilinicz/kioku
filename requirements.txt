@@ -1,4 +1,7 @@
-sqlalchemy
-databases
 opencv-python
 starlette
+uvicorn
+imutils
+numpy
+aiofiles
+face-recognition

@@ -1,4 +1,5 @@
-require('dotenv').config()
+import { config } from 'dotenv'
+
 const development = process.env.NODE_ENV !== 'production'
 
 export default {
