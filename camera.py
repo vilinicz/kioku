@@ -85,7 +85,7 @@ def detect(frame):
                                 match = face_recognition.compare_faces(
                                     [matched_average],
                                     face['encoding'],
-                                    tolerance=0.6)
+                                    tolerance=0.55)
                                 if all(match):
                                     current_face = face.copy()
                                     matched = True
