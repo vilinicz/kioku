@@ -131,37 +131,34 @@ def open_stream(ctype, url, lat, width, height):
                                                        width,
                                                        height, 5)
 
-    if platform.machine() == "aarch64":
-        print("Running on Jetson")
-        if ctype == 'rtsp':
-            vs = cv2.VideoCapture(gst_rtsp, cv2.CAP_GSTREAMER)
-        else:
-            # return cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
-            string = '/dev/video{}'.format(url)
-            vs = cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
-    else:
-        print("Running Locally")
-        vs = cv2.VideoCapture(url)
-        vs.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-        vs.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-
     def decode_fourcc(v):
         v = int(v)
         return "".join([chr((v >> 8 * i) & 0xFF) for i in range(4)])
 
-    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    # vs.set(cv2.CAP_PROP_FOURCC, fourcc)
-    # vs.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-    # vs.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-    # vs.set(cv2.CAP_PROP_FPS, 5.0)
-    print("Resolution:", vs.get(cv2.CAP_PROP_FRAME_WIDTH), 'x',
-          vs.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    print("FPS", vs.get(cv2.CAP_PROP_FPS))
-    c = vs.get(cv2.CAP_PROP_FOURCC)
-    print('Fourcc:', decode_fourcc(c))
-    print("Format", vs.get(cv2.CAP_PROP_FORMAT))
+    if platform.machine() == "aarch64":
+        print("Running on Jetson")
+        if ctype == 'rtsp':
+            vs = cv2.VideoCapture(gst_rtsp, cv2.CAP_GSTREAMER)
+            return vs
+        else:
+            vs = cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
+            fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+            # vs.set(cv2.CAP_PROP_FOURCC, fourcc)
+            # vs.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+            # vs.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+            # vs.set(cv2.CAP_PROP_FPS, 5.0)
+            print("Resolution:", vs.get(cv2.CAP_PROP_FRAME_WIDTH), 'x',
+                  vs.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            print("FPS", vs.get(cv2.CAP_PROP_FPS))
+            c = vs.get(cv2.CAP_PROP_FOURCC)
+            print('Fourcc:', decode_fourcc(c))
+            print("Format", vs.get(cv2.CAP_PROP_FORMAT))
 
-    return vs
+            return vs
+    else:
+        print("Running Locally")
+        vs = cv2.VideoCapture(url)
+        return vs
 
 
 class Camera:
