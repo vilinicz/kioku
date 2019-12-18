@@ -18,7 +18,7 @@ logger.setLevel(logging.DEBUG)
 buffer = Buffer(size=6)
 
 
-def detect(frame):
+def detect(frame, resize):
     global buffer
 
     current_face = {}
@@ -31,7 +31,7 @@ def detect(frame):
     process_this_frame = True
 
     try:
-        small_frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
+        small_frame = cv2.resize(frame, (0, 0), fx=1/resize, fy=1/resize)
         rgb_small_frame = small_frame[:, :, ::-1]
     except Exception as e:
         process_this_frame = False
@@ -96,10 +96,10 @@ def detect(frame):
                                 Face.create('', matched_average)
 
                         top, right, bottom, left = matched_locations[-3]
-                        top = int(top * 2 * 0.6)
-                        right = int(right * 2 * 1.08)
-                        bottom = int(bottom * 2 * 1.05)
-                        left = int(left * 2 * 0.92)
+                        top = int(top * resize * 0.6)
+                        right = int(right * resize * 1.08)
+                        bottom = int(bottom * resize * 1.05)
+                        left = int(left * resize * 0.92)
 
                         frame_face = matched_frames[-3][top:bottom, left:right]
 
@@ -148,7 +148,8 @@ def open_stream(ctype, url, lat, width, height):
 
 
 class Camera:
-    def __init__(self, cid, ctype, url, lat, width, height):
+    def __init__(self, cid, ctype, url, lat, width, height, resize):
+        self.resize = resize
         self.ctype = ctype
         self.cid = cid
         self.url = url
@@ -156,7 +157,8 @@ class Camera:
         self.width = width
         self.height = height
 
-        self.stream = None
+        self.stream = open_stream(self.ctype, self.url, self.lat, self.width,
+                                  self.height)
         self.frame = None
         self.frame_face = None
         self.current_faces = []
@@ -170,6 +172,12 @@ class Camera:
         self.thread = Thread(target=self.run, args=())
         self.thread.daemon = True
 
+        if not self.stream.isOpened():
+            # TODO maybe retry instead of raise error
+            raise RuntimeError("Could not start video.")
+        else:
+            print(self.stream.isOpened())
+
         with open("placeholder.jpg", "rb") as image:
             print("Load placeholder")
             f = image.read()
@@ -180,14 +188,6 @@ class Camera:
         return self
 
     def run(self):
-        self.stream = open_stream(self.ctype, self.url, self.lat, self.width,
-                                  self.height)
-
-        if not self.stream.isOpened():
-            # TODO maybe retry instead of raise error
-            raise RuntimeError("Could not start video.")
-        else:
-            print(self.stream.isOpened())
         count = 0
         while not self.stopped:
             (g, f) = self.stream.read()
@@ -211,7 +211,7 @@ class Camera:
             self.frame = f.copy()
 
             try:
-                ok, ff, cf = detect(f)
+                ok, ff, cf = detect(f, self.resize)
                 if ok:
                     self.frame_face = ff
                     self.current_faces = cf

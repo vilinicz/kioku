@@ -78,3 +78,17 @@ class Face:
         with database() as db:
             db.execute('SELECT * from faces')
             cls.cache = db.fetchall()
+
+    @classmethod
+    def create_table(cls):
+        with database() as db:
+            create_db = """
+                CREATE TABLE IF NOT EXISTS faces (
+                id INTEGER,
+                name VARCHAR,
+                room INTEGER,
+                note TEXT,
+                encoding array,
+                PRIMARY KEY (id));
+            """
+            db.executescript(create_db)

@@ -88,9 +88,10 @@ async def stream(request):
 
 def startup():
     global cameras
+    Face.create_table()
     for c in cc:
         ccc = Camera(c['id'], c['type'], c['url'], c['lat'], c['width'],
-                     c['height'])
+                     c['height'], c['resize'])
         ccc.start()
         cameras.append(
             ccc

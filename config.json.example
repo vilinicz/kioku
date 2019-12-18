@@ -2,10 +2,12 @@
   "cameras": [
     {
       "id": 1,
+      "type": "rtsp",
       "url": "rtsp://address.stream",
       "lat": 0,
       "width": 1280,
-      "height": 720
+      "height": 720,
+      "resize": 4
     }
   ]
 }
