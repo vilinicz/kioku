@@ -31,7 +31,7 @@ def detect(frame, resize):
     process_this_frame = True
 
     try:
-        small_frame = cv2.resize(frame, (0, 0), fx=1/resize, fy=1/resize)
+        small_frame = cv2.resize(frame, (0, 0), fx=1 / resize, fy=1 / resize)
         rgb_small_frame = small_frame[:, :, ::-1]
     except Exception as e:
         process_this_frame = False
@@ -124,27 +124,44 @@ def open_stream(ctype, url, lat, width, height):
                                                                       width,
                                                                       height)
     # TODO Gstreamer not working
-    gst_usb = 'v4l2src device=/dev/video{} ! video/x-raw, width=(int){}, ' \
-              'height=(int){}, framerate=(fraction){}/1 ! videoconvert ! ' \
-              'video/x-raw, format=(string)BGRx ! appsink'.format(url,
-                                                                  width,
-                                                                  height, 30)
+    gst_usb = 'v4l2src device=/dev/video{} ! video/x-raw, format=(' \
+              'string)YUY2, width=(int){}, height=(int){}, framerate=(' \
+              'fraction){}/1 ! videoconvert ! video/x-raw, format=(string)BGR' \
+              ' ! appsink drop=true sync=false'.format(url,
+                                                       width,
+                                                       height, 5)
 
     if platform.machine() == "aarch64":
         print("Running on Jetson")
         if ctype == 'rtsp':
-            return cv2.VideoCapture(gst_rtsp, cv2.CAP_GSTREAMER)
+            vs = cv2.VideoCapture(gst_rtsp, cv2.CAP_GSTREAMER)
         else:
             # return cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
             string = '/dev/video{}'.format(url)
-            vs = cv2.VideoCapture(string)
-            return vs
+            vs = cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
     else:
         print("Running Locally")
         vs = cv2.VideoCapture(url)
         vs.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         vs.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-        return vs
+
+    def decode_fourcc(v):
+        v = int(v)
+        return "".join([chr((v >> 8 * i) & 0xFF) for i in range(4)])
+
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    # vs.set(cv2.CAP_PROP_FOURCC, fourcc)
+    # vs.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    # vs.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+    # vs.set(cv2.CAP_PROP_FPS, 5.0)
+    print("Resolution:", vs.get(cv2.CAP_PROP_FRAME_WIDTH), 'x',
+          vs.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    print("FPS", vs.get(cv2.CAP_PROP_FPS))
+    c = vs.get(cv2.CAP_PROP_FOURCC)
+    print('Fourcc:', decode_fourcc(c))
+    print("Format", vs.get(cv2.CAP_PROP_FORMAT))
+
+    return vs
 
 
 class Camera:
@@ -159,6 +176,7 @@ class Camera:
 
         self.stream = open_stream(self.ctype, self.url, self.lat, self.width,
                                   self.height)
+
         self.frame = None
         self.frame_face = None
         self.current_faces = []
