@@ -126,7 +126,7 @@ def open_stream(ctype, url, lat, width, height):
     # TODO Gstreamer not working
     g_usb = ('v4l2src device=/dev/video{} ! '
              'image/jpeg, width={}, height={}, framerate={}/1, format=MJPG ! '
-             'jpegdec ! xvimagesink').format(url,
+             'jpegdec ! xvimagesink ! appsink').format(url,
                                              width,
                                              height, 30)
 
@@ -140,8 +140,12 @@ def open_stream(ctype, url, lat, width, height):
             vs = cv2.VideoCapture(g_rtsp, cv2.CAP_GSTREAMER)
             return vs
         else:
-            vs = cv2.VideoCapture(g_usb, cv2.CAP_GSTREAMER)
+            vs = cv2.VideoCapture(0)
             fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+            vs.set(cv2.CAP_PROP_FOURCC, fourcc)
+            vs.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+            vs.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+            # vs.set(cv2.CAP_PROP_FPS, 5.0)
             print("Resolution:", vs.get(cv2.CAP_PROP_FRAME_WIDTH), 'x',
                   vs.get(cv2.CAP_PROP_FRAME_HEIGHT))
             print("FPS", vs.get(cv2.CAP_PROP_FPS))
