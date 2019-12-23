@@ -115,21 +115,20 @@ def detect(frame, resize):
 
 
 def open_stream(ctype, url, lat, width, height):
-    gst_rtsp = ('rtspsrc location={} latency={} ! queue ! '
-                'rtph264depay ! h264parse ! omxh264dec ! '
-                'nvvidconv ! '
-                'video/x-raw, width=(int){}, height=(int){}, '
-                'format=(string)BGRx ! '
-                'videoconvert ! appsink drop=true sync=false').format(url, lat,
-                                                                      width,
-                                                                      height)
+    g_rtsp = ('rtspsrc location={} latency={} ! queue ! '
+              'rtph264depay ! h264parse ! omxh264dec ! '
+              'nvvidconv ! '
+              'video/x-raw, width=(int){}, height=(int){}, '
+              'format=(string)BGRx ! '
+              'videoconvert ! appsink drop=true sync=false').format(url, lat,
+                                                                    width,
+                                                                    height)
     # TODO Gstreamer not working
-    gst_usb = 'v4l2src device=/dev/video{} ! video/x-raw, format=(' \
-              'string)YUY2, width=(int){}, height=(int){}, framerate=(' \
-              'fraction){}/1 ! videoconvert ! video/x-raw, format=(string)BGR' \
-              ' ! appsink drop=true sync=false'.format(url,
-                                                       width,
-                                                       height, 5)
+    g_usb = ('v4l2src device=/dev/video{} ! '
+             'image/jpeg, width={}, height={}, framerate={}/1, format=MJPG ! '
+             'jpegdec ! xvimagesink').format(url,
+                                             width,
+                                             height, 30)
 
     def decode_fourcc(v):
         v = int(v)
@@ -138,15 +137,11 @@ def open_stream(ctype, url, lat, width, height):
     if platform.machine() == "aarch64":
         print("Running on Jetson")
         if ctype == 'rtsp':
-            vs = cv2.VideoCapture(gst_rtsp, cv2.CAP_GSTREAMER)
+            vs = cv2.VideoCapture(g_rtsp, cv2.CAP_GSTREAMER)
             return vs
         else:
-            vs = cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
+            vs = cv2.VideoCapture(g_usb, cv2.CAP_GSTREAMER)
             fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-            # vs.set(cv2.CAP_PROP_FOURCC, fourcc)
-            # vs.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-            # vs.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-            # vs.set(cv2.CAP_PROP_FPS, 5.0)
             print("Resolution:", vs.get(cv2.CAP_PROP_FRAME_WIDTH), 'x',
                   vs.get(cv2.CAP_PROP_FRAME_HEIGHT))
             print("FPS", vs.get(cv2.CAP_PROP_FPS))
