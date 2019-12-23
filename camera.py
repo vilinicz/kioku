@@ -141,10 +141,10 @@ def open_stream(ctype, url, lat, width, height):
             return vs
         else:
             vs = cv2.VideoCapture(0)
-            fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-            vs.set(cv2.CAP_PROP_FOURCC, fourcc)
-            vs.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-            vs.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+            # fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+            # vs.set(cv2.CAP_PROP_FOURCC, fourcc)
+            # vs.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+            # vs.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
             # vs.set(cv2.CAP_PROP_FPS, 5.0)
             print("Resolution:", vs.get(cv2.CAP_PROP_FRAME_WIDTH), 'x',
                   vs.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -202,7 +202,6 @@ class Camera:
         return self
 
     def run(self):
-        count = 0
         while not self.stopped:
             (g, f) = self.stream.read()
 
@@ -216,11 +215,6 @@ class Camera:
 
             if np.shape(f) == () or np.sum(f) == 0:
                 continue
-
-            count += 1
-            if count < 4:
-                continue
-            count = 0
 
             self.frame = f.copy()
 
