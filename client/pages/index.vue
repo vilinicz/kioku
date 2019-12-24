@@ -64,7 +64,7 @@ export default {
     async get () {
       let newFaces = []
       try {
-        const res = await this.$axios.get('/current_faces/1')
+        const res = await this.$axios.get('/current_faces/1', { timeout: 1000 })
         newFaces = res.data
         this.error = undefined
       } catch (e) {
