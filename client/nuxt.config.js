@@ -70,6 +70,18 @@ export default {
   axios: {
     baseURL: development ? '//192.168.1.254:8000/' : process.env.BASE_URL
   },
+
+  // PWA configuration
+  pwa: {
+    manifest: {
+      name: 'Kioku',
+      lang: 'ru',
+      background_color: '#fff',
+      theme_color: '#fff',
+      description: 'Know your guests with Kioku app'
+    }
+  },
+
   /*
   ** Build configuration
   */
