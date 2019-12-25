@@ -15,7 +15,7 @@ from buffer import Buffer
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-buffer = Buffer(size=6)
+buffer = Buffer(size=5)
 
 
 def detect(frame, resize):
@@ -140,7 +140,7 @@ def open_stream(ctype, url, lat, width, height):
             vs = cv2.VideoCapture(g_rtsp, cv2.CAP_GSTREAMER)
             return vs
         else:
-            vs = cv2.VideoCapture(0)
+            vs = cv2.VideoCapture(url)
             # fourcc = cv2.VideoWriter_fourcc(*'MJPG')
             # vs.set(cv2.CAP_PROP_FOURCC, fourcc)
             # vs.set(cv2.CAP_PROP_FRAME_WIDTH, width)
