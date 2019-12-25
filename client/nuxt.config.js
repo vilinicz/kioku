@@ -10,6 +10,7 @@ export default {
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
       {
         hid: 'description',
         name: 'description',
@@ -73,6 +74,9 @@ export default {
 
   // PWA configuration
   pwa: {
+    meta: {
+      appleStatusBarStyle: 'default'
+    },
     manifest: {
       name: 'Kioku',
       lang: 'ru',
