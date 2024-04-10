@@ -98,5 +98,10 @@ export default {
     */
     extend (config, ctx) {
     }
+  },
+
+  publicRuntimeConfig: {
+    secondsToOffline: process.env.SECONDS_TO_OFFLINE || 3,
+    secondsToHide: process.env.SECONDS_TO_HIDE || 100
   }
 }
