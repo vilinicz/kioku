@@ -75,6 +75,9 @@ export default {
 
   // PWA configuration
   pwa: {
+    icon: {
+      source: 'static/icon.png'
+    },
     meta: {
       appleStatusBarStyle: 'default'
     },
