@@ -1,7 +1,8 @@
 const development = process.env.NODE_ENV !== 'production'
 
 export default {
-  mode: 'spa',
+  ssr: false,
+  target: 'static',
   /*
   ** Headers of the page
   */
