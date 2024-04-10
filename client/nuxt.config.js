@@ -2,7 +2,6 @@ const development = process.env.NODE_ENV !== 'production'
 
 export default {
   ssr: false,
-  target: 'static',
   /*
   ** Headers of the page
   */
@@ -83,7 +82,7 @@ export default {
     },
     manifest: {
       name: 'Kioku',
-      lang: 'ru',
+      lang: 'en',
       background_color: '#fff',
       theme_color: '#fff',
       description: 'Know your guests with Kioku app'

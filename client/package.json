@@ -1,7 +1,7 @@
 {
   "name": "kioku",
   "version": "1.0.0",
-  "description": "My sublime Nuxt.js project",
+  "description": "Kioku frontend app",
   "author": "vilinicz",
   "private": true,
   "scripts": {
