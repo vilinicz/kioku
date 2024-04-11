@@ -1,107 +1,36 @@
-## Kioku app
-
-
-#### Local
-
-build and push 
-
+![Kioku App](./logo.png)  
 ---
-#### Jetson setup
-  
-set hostname and install nano:
-```
-sudo hostnamectl set-hostname kioku
-sudo apt-get install nano
-```
-global deps:
-```
-sudo apt-get update
-sudo apt-get install python3-pip cmake libopenblas-dev liblapack-dev libjpeg-dev
-```
-Swap file:
-```
-git clone https://github.com/JetsonHacksNano/installSwapfile
-./installSwapfile/installSwapfile.sh
-```
+Kioku is a hotel manager assistance app that helps to know guests at reception faster.  
+Consider it as a _proof of concept_, first iteration _MVP_.
+![Kioku Demo](./kioku_demo.gif)  
+1. recognize guests in a video stream;
+2. show guest cards in UI: current photo with editable name, room & note fields;
+3. autosave all the data: create new record for new guest or update existing one;
 
-#### Reboot now
+## Key concepts
+- **App doesn't store photos.** Nuff said 😄  
+  My core idea was to store only encodings, thus it required some additional work to make recognition more accurate: buffering encodings, finding the average, etc..  
+  This way, even if the database is stolen, it's impossible to restore the original photos and match the data to real people.
+- **Runs completely offline:** on a local network or laptop.  
+  Inference is done on a local machine just as is frontend rendering.
+  All the data is stored on the device.
+- **Runs on any device** that supports Python: Jetson Nano, laptop and others.
+- **Consumes streams from multiple sources simultaneously:** webcams, RTSP streams.  
+  _However, simultaneous streams feature is less tested, requires some code-related enhancements and better be run on a powerful device (like Jetson)._
+- **UI can be opened on tablet/laptop/phone**, any device with browser.
 
-----
-Install Numpy (check for version 17), maybe with sudo:
-```
-pip3 install numpy
-```
-Download Dlib, apply fix and compile:
-```
-wget http://dlib.net/files/dlib-19.19.tar.bz2 
-tar jxvf dlib-19.19.tar.bz2
-cd dlib-19.19
+## Tech details 
+- **Backend:** Python, Starlette, Uvicorn, face_recognition, OpenCV, Dlib, Numpy, SQLite.
+- **Frontend:** Nuxt PWA app, Axios, long-polling.
 
-nano dlib/cuda/cudnn_dlibapi.cpp
-// Comment out this line & save! 
-// ~#854 forward_algo = forward_best_algo;
+### To try or develop locally
+1. Clone the repo.
+2. Install Python dependencies
+3. Create `config.json` file (see `config.json.example`)
+4. Run `app:app --reload --debug --host=0.0.0.0 --port=8000  --log-level=debug`
+5. Open `http://localhost:8000` in browser.
+6. Voila!
 
-sudo python3 setup.py install
-```
+For frontend development you also need to install frontend dependencies: `cd client & npm i`
 
-#### NEXT:
-2) mkdir projects/kioku and cd
-3) git clone kioku repo
-4) create config.json
-5) install project deps:
-```
-pip3 install uvicorn
-pip3 install starlette
-pip3 install face_recognition
-```
-
----
-#### Autostart:
-```
-cd /etc/systemd/system
-sudo nano kioku.service
-```
-Paste:
-```
-[Unit]
-Description=Kioku app
-After=network.target
-
-[Service]
-User=developer
-WorkingDirectory=/home/developer/projects/kioku
-ExecStart=/usr/bin/python3 /home/developer/projects/kioku/app.py
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-Enable:
-```
-sudo systemctl daemon-reload
-sudo systemctl enable kioku
-sudo service kioku start
-```
----
-#### NGINX:
-```
-sudo apt-get install nginx
-sudo nano /etc/nginx/sites-available/kioku.conf
-```
-Paste:
-```
-server {
-    listen 80;
-
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-    }
-}
-```
-next:
-```
-sudo ln -s /etc/nginx/sites-available/kioku.conf /etc/nginx/sites-enabled/
-sudo rm /etc/nginx/sites-enabled/default
-```
------
-#### Reboot
+To set up more production like installation with Jetson and local network see [INSTALLATION.md](./INSTALLATION.md)

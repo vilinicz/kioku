@@ -1,7 +1,16 @@
 {
   "cameras": [
-    {
+    { // Use this one to run on a laptop with laptop camera
       "id": 1,
+      "type": 0,
+      "url": 0,
+      "lat": 0,
+      "width": 1280,
+      "height": 720,
+      "resize": 2
+    },
+    {
+      "id": 2,
       "type": "rtsp",
       "url": "rtsp://address.stream",
       "lat": 0,
