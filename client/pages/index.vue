@@ -10,8 +10,8 @@
       <FaceCard
         v-for="face in faces"
         :key="face.id"
-        @destroy="removeOldFace"
         v-bind="face"
+        @destroy="removeOldFace"
       />
     </transition-group>
   </div>

@@ -122,8 +122,9 @@ export default {
 
     refresh () {
       this.refreshing = setInterval(() => {
-        this.online = ((Date.now() - this.datetime) / 1000) < 3
-        if (((Date.now() - this.datetime) / 1000) > 180) {
+        const delta = ((Date.now() - this.datetime) / 1000)
+        this.online = (delta < this.$config.secondsToOffline)
+        if (delta > this.$config.secondsToHide) {
           this.$emit('destroy', this.id)
         }
       }, 1000)

@@ -1,7 +1,7 @@
 const development = process.env.NODE_ENV !== 'production'
 
 export default {
-  mode: 'spa',
+  ssr: false,
   /*
   ** Headers of the page
   */
@@ -74,12 +74,15 @@ export default {
 
   // PWA configuration
   pwa: {
+    icon: {
+      source: 'static/icon.png'
+    },
     meta: {
       appleStatusBarStyle: 'default'
     },
     manifest: {
       name: 'Kioku',
-      lang: 'ru',
+      lang: 'en',
       background_color: '#fff',
       theme_color: '#fff',
       description: 'Know your guests with Kioku app'
@@ -95,5 +98,10 @@ export default {
     */
     extend (config, ctx) {
     }
+  },
+
+  publicRuntimeConfig: {
+    secondsToOffline: process.env.SECONDS_TO_OFFLINE || 3,
+    secondsToHide: process.env.SECONDS_TO_HIDE || 100
   }
 }

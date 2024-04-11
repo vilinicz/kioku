@@ -1,7 +1,7 @@
 {
   "name": "kioku",
   "version": "1.0.0",
-  "description": "My sublime Nuxt.js project",
+  "description": "Kioku frontend app",
   "author": "vilinicz",
   "private": true,
   "scripts": {
@@ -26,7 +26,7 @@
     "babel-eslint": "^10.0.1",
     "eslint": "^6.1.0",
     "eslint-plugin-nuxt": ">=0.4.2",
-    "node-sass": "^4.13.0",
-    "sass-loader": "^8.0.0"
+    "sass": "^1.74.1",
+    "sass-loader": "^10.5.2"
   }
 }

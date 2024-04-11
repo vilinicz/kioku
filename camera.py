@@ -39,11 +39,11 @@ def detect(frame, resize):
 
     if process_this_frame:
         # Add to params model='cnn' to detect on GPU
-        fls = face_recognition.face_locations(rgb_small_frame)
+        face_locs = face_recognition.face_locations(rgb_small_frame)
 
-        if any(fls):
-            fes = face_recognition.face_encodings(rgb_small_frame, fls)
-            for fe, fl in zip(fes, fls):
+        if any(face_locs):
+            face_encs = face_recognition.face_encodings(rgb_small_frame, face_locs)
+            for fe, fl in zip(face_encs, face_locs):
                 buffer.add(face=(fe, fl, frame))
 
             from_buffer = buffer.get_active_groups()
@@ -96,6 +96,8 @@ def detect(frame, resize):
                                 Face.create('', matched_average)
 
                         top, right, bottom, left = matched_locations[-3]
+                        # This is a hack to get the person's face a bit bigger
+                        # and better centered in the interface
                         top = int(top * resize * 0.8)
                         right = int(right * resize * 1.08)
                         bottom = int(bottom * resize * 1.05)
@@ -183,6 +185,8 @@ class Camera:
 
         self.stopped = False
 
+        # TODO not sure if we need Threads at all
+        # For multiple cameras it may be more useful to use multiprocessing
         self.thread = Thread(target=self.run, args=())
         self.thread.daemon = True
 

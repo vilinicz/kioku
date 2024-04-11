@@ -1,5 +1,4 @@
 import time
-import datetime
 
 import uvicorn
 from starlette.applications import Starlette
@@ -10,7 +9,7 @@ from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 
 from camera import Camera
-from config import cameras as cc
+from config import cameras as camera_configs
 from db import Face
 
 cameras = []
@@ -38,14 +37,15 @@ async def update_face(request):
     return JSONResponse(res)
 
 
+# Renders current faces for a given camera
 async def get_current_faces(request):
     cid = request.path_params['cid']
     camera = next(filter(lambda c: c.cid == cid, cameras), None)
-    cfs = camera.current_faces
-    for cf in cfs:
-        if 'encoding' in cf:
-            del cf['encoding']
-    res = cfs
+    current_faces = camera.current_faces
+    for current_face in current_faces:
+        if 'encoding' in current_face:
+            del current_face['encoding']
+    res = current_faces
 
     return JSONResponse(res)
 
@@ -89,13 +89,10 @@ async def stream(request):
 def startup():
     global cameras
     Face.create_table()
-    for c in cc:
-        ccc = Camera(c['id'], c['type'], c['url'], c['lat'], c['width'],
-                     c['height'], c['resize'])
-        ccc.start()
-        cameras.append(
-            ccc
-        )
+    for config in camera_configs:
+        camera = Camera(config['id'], config['type'], config['url'], config['lat'],
+                        config['width'], config['height'], config['resize'])
+        cameras.append(camera.start())
     print('Started Cameras:', list(map(lambda cam: cam.cid, cameras)))
 
 
