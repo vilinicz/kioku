@@ -1,6 +1,6 @@
 ![Kioku App](./logo.png) 
 
-Kioku is a hotel manager assistance app that helps to know guests at reception faster.
+Kioku is a hotel manager assistance app that helps to know guests at reception faster.  
 _Consider it as a proof of concept, first iteration MVP._  
 
 ![Kioku Demo](./kioku_demo.gif)  
