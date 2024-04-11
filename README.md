@@ -1,9 +1,8 @@
-![Kioku App](./logo.png)  
-Kioku is a hotel manager assistance app that helps to know guests at reception faster. 
+![Kioku App](./logo.png) 
 
+Kioku is a hotel manager assistance app that helps to know guests at reception faster.
 _Consider it as a proof of concept, first iteration MVP._  
 
----
 ![Kioku Demo](./kioku_demo.gif)  
 1. recognize guests in a video stream;
 2. show guest cards in UI: current photo with editable name, room & note fields;
@@ -25,7 +24,7 @@ _Consider it as a proof of concept, first iteration MVP._
 - **Backend:** Python, Starlette, Uvicorn, face_recognition, OpenCV, Dlib, Numpy, SQLite.
 - **Frontend:** Nuxt PWA app, Axios, long-polling.
 
-### To try or develop locally
+#### Try or develop locally
 1. Clone the repo.
 2. Install Python dependencies
 3. Create `config.json` file (see `config.json.example`)
@@ -35,12 +34,12 @@ _Consider it as a proof of concept, first iteration MVP._
 
 For frontend development you also need to install frontend dependencies: `cd client & npm i`
 
-To set up more production like installation with Jetson and local network see [INSTALLATION.md](./INSTALLATION.md)  
+#### Set up with Jetson and local network  
+see [INSTALLATION.md](./INSTALLATION.md)  
 
 ---
-> [!NOTE]  
-> 
-> All the code is provided as is, without any warranty.   
+### Disclaimer
+All the code is provided as is, without any warranty.   
 Both backend and frontend parts are designed and implemented by me.  
 `Buffer` part was initially implemented by my friend [megaaction](https://github.com/megaaction), so big thanks to him!  
 Kioku logo and related design elements are created and beloved a lot by me as well and I own the rights to them.
