@@ -1,7 +1,9 @@
 ![Kioku App](./logo.png)  
+Kioku is a hotel manager assistance app that helps to know guests at reception faster. 
+
+_Consider it as a proof of concept, first iteration MVP._  
+
 ---
-Kioku is a hotel manager assistance app that helps to know guests at reception faster.  
-Consider it as a _proof of concept_, first iteration _MVP_.
 ![Kioku Demo](./kioku_demo.gif)  
 1. recognize guests in a video stream;
 2. show guest cards in UI: current photo with editable name, room & note fields;
@@ -33,4 +35,12 @@ Consider it as a _proof of concept_, first iteration _MVP_.
 
 For frontend development you also need to install frontend dependencies: `cd client & npm i`
 
-To set up more production like installation with Jetson and local network see [INSTALLATION.md](./INSTALLATION.md)
+To set up more production like installation with Jetson and local network see [INSTALLATION.md](./INSTALLATION.md)  
+
+---
+> [!NOTE]  
+> 
+> All the code is provided as is, without any warranty.   
+Both backend and frontend parts are designed and implemented by me.  
+`Buffer` part was initially implemented by my friend [megaaction](https://github.com/megaaction), so big thanks to him!  
+Kioku logo and related design elements are created and beloved a lot by me as well and I own the rights to them.
